@@ -15,7 +15,7 @@ case $choice in
             echo "成功进入虚拟环境"
             echo "正在启动 Eridanus..."
             cd Eridanus
-            python main.py
+            python launch.py
 
         ;;
 

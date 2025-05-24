@@ -17,7 +17,6 @@ case $reply in
   5) CLONE_URL="https://gh.llkk.cc/https://github.com/avilliai/Eridanus.git" ;;
   *) echo "无效输入，使用默认源"; CLONE_URL="https://ghfast.top/https://github.com/avilliai/Eridanus.git" ;;
 esac
-conda init
 conda activate qqbot
   echo "克隆项目"
 cd $(pwd)

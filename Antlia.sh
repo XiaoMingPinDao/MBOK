@@ -36,29 +36,10 @@ ArchLinux Eridanus部署脚本😋😋😋
 "
 echo "请回车进行下一步"
 read -r
-#选择
-echo "选择克隆源10秒后自动选择镜像源"
-echo "1. 官方源 (github.com)"
-echo "2. 镜像源1 (ghproxy.com)"
-echo "3. 镜像源2 (github.moeyy.xyz)"
-echo "4. 镜像源3 (ghfast.top) [默认]"
-echo "5. 镜像源4 (gh.llkk.cc)"
-
-read -t 10 -p "请输入数字（1-5）: " reply
-reply=${reply:-4}  # 默认4
-case $reply in
-  1) CLONE_URL="https://github.com/avilliai/Eridanus.git" ;;
-  2) CLONE_URL="https://mirror.ghproxy.com/https://github.com/avilliai/Eridanus.git" ;;
-  3) CLONE_URL="https://github.moeyy.xyz/https://github.com/avilliai/Eridanus.git" ;;
-  4) CLONE_URL="https://ghfast.top/https://github.com/avilliai/Eridanus.git" ;;
-  5) CLONE_URL="https://gh.llkk.cc/https://github.com/avilliai/Eridanus.git" ;;
-  *) echo "无效输入，使用默认源"; CLONE_URL="https://ghfast.top/https://github.com/avilliai/Eridanus.git" ;;
-esac
-
 # 更新和安装
 sudo pacman -Syu --noconfirm
 sudo pacman -S git gcc base-devel whiptail --noconfirm
-#!/bin/bash
+
 
 
 # 配置区
@@ -175,8 +156,6 @@ install_napcatqq() {
     echo "NapCatQQ 安装完成！"
 }
 
-
-# 主交
 clear
 echo "===== Napcat安装向导 ====="
 echo "请选择安装方式："
@@ -300,23 +279,16 @@ install_miniconda
 source ~/miniconda3/bin/activate
 conda init --all
 conda create -n qqbot python=3.13 --yes
-conda activate qqbot
-
-
-# 克隆项目
-
-echo "克隆项目"
-cd $(pwd)
-git clone --depth 1 "$CLONE_URL" Eridanus && cd Eridanus
-
-# 安装依赖
-pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
-pip install --user --upgrade pip && pip install -r requirements.txt
+wget https://github.com/zhende1113/Antlia/blob/main/Eridanus-install.sh
+chmod +x Eridanus-install.sh
+./Eridanus-install.sh
+wget https://github.com/zhende1113/Antlia/blob/main/SetUP.sh
+chmod +x SetUP.sh
 
 echo "安装完成😋"
 echo "1. WebUI配置: http://127.0.0.1:6099/webui?token=napcat
 2. 启动环境: source ~/miniconda3/envs/qqbot/bin/activate
-3. 运行项目: 
+3. 运行项目:
 cd Eridanus
 python main.py
 更新
@@ -325,7 +297,7 @@ cd Eridanus
 python tool.py
 如果启动的时候报错请执行 指的是第一次启动
 pip3 install audioop-lts
-
+启动脚本 ./SetUP.sh
 项目地址 https://github.com/avilliai/Eridanus/releases
 官方文档 https://eridanus-doc.netlify.app
 官方群聊 913122269
