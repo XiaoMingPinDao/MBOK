@@ -3,10 +3,10 @@
 部署Eridanus脚本
 
 适用于pacman apt yum软件包管理器
-## Install
+## 我该如何安装🤨
 wget https://github.com/zhende1113/Antlia/blob/main/Antlia.sh
 chmod +x Antlia.sh
 ./Antlia.sh
 
-### START
+### 我该如何启动 🤔
 ./start.sh
