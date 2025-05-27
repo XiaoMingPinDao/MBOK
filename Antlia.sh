@@ -1,45 +1,40 @@
 #!/bin/bash
-
-# ======================
-# 系统检测与变量定义
-# ======================
-IS_ARCH=$(grep -q "Arch Linux" /etc/os-release || grep -q "arch" /etc/os-release)
-PACKAGE_MANAGER=$(awk -F'=' '/^ID=/' /etc/os-release | tr -d '"')
-
-# ======================
-# 交互式选择
-# ======================
-clear
-echo "检测到系统：$(if $IS_ARCH; then echo "Arch Linux"; else echo "其他系统"; fi)"
-echo "---------------------------"
-echo "如果您是Arch Linux用户，请输入y（默认）"
-echo "如果您是其他系统（apt/yum），请输入n"
-
-#默认值为y
-read -p "请输入选择(y/n)[y]: " choice
-choice=${choice:-y}  # 默认选择y
-
-if [[ $choice =~ ^[Yy]$ ]]; then
-    # Arch Linux 流程
-    if ! $IS_ARCH; then
-        echo "错误：当前系统不是Arch Linux，无法执行y选项"
-        exit 1
-    fi
-# 日志文件路径
 LOG_FILE="Eridanus-install_log.txt"
-if ! grep -q "Arch Linux" /etc/os-release && ! grep -q "arch" /etc/os-release; then
-  echo "错误：当前系统不是 Arch Linux"
-  exit 1
-fi
+
+# 检测包管理器
+if command -v pacman &> /dev/null; then
 echo "
-ArchLinux Eridanus部署脚本😋😋😋
+Eridanus部署脚本
 "
 echo "请回车进行下一步"
 read -r
-# 更新和安装
-sudo pacman -Syu --noconfirm
-sudo pacman -S git gcc base-devel whiptail --noconfirm
+#选择
+echo "选择克隆源10秒后自动选择镜像源"
+echo "1. 官方源 (github.com)"
+echo "2. 镜像源1 (ghproxy.com)"
+echo "3. 镜像源2 (github.moeyy.xyz)"
+echo "4. 镜像源3 (ghfast.top) [默认]"
+echo "5. 镜像源4 (gh.llkk.cc)"
 
+read -t 10 -p "请输入数字（1-5）: " reply
+reply=${reply:-4}  # 默认4
+case $reply in
+  1) CLONE_URL="https://github.com/avilliai/Eridanus.git" ;;
+  2) CLONE_URL="https://mirror.ghproxy.com/https://github.com/avilliai/Eridanus.git" ;;
+  3) CLONE_URL="https://github.moeyy.xyz/https://github.com/avilliai/Eridanus.git" ;;
+  4) CLONE_URL="https://ghfast.top/https://github.com/avilliai/Eridanus.git" ;;
+  5) CLONE_URL="https://gh.llkk.cc/https://github.com/avilliai/Eridanus.git" ;;
+  *) echo "无效输入，使用默认源"; CLONE_URL="https://ghfast.top/https://github.com/avilliai/Eridanus.git" ;;
+esac
+
+# 更新和安装
+sudo pacman -Sy --noconfirm
+sudo pacman -S git gcc base-devel whiptail --noconfirm
+echo "克隆项目"
+
+
+cd $(pwd)
+git clone --depth 1 "$CLONE_URL" Eridanus && echo "克隆项目"
 
 
 # 配置区
@@ -48,7 +43,8 @@ PLUGIN_DIR="$LL_PATH/plugins"                # 插件目录
 NAPCAT_FRAMEWORK_URL="https://ghfast.top/https://github.com/NapNeko/NapCatQQ/releases/download/v4.7.68/NapCat.Framework.zip"
 NAPCAT_ZIP="NapCat.Framework.zip"
 
-# 函数定义
+
+
 # 检查Yay
 check_yay_installed() {
     command -v yay >/dev/null 2>&1
@@ -57,11 +53,7 @@ check_yay_installed() {
 
 # 安装Yay
 install_yay() {
-    echo "正在安装Yay依赖..."
-    sudo pacman -S git base-devel --noconfirm || {
-        echo "错误：安装依赖失败"
-        return 1
-    }
+    
     git clone https://aur.archlinux.org/yay-bin.git || {
         echo "错误：克隆Yay仓库失败"
         return 1
@@ -156,6 +148,8 @@ install_napcatqq() {
     echo "NapCatQQ 安装完成！"
 }
 
+
+# 主交
 clear
 echo "===== Napcat安装向导 ====="
 echo "请选择安装方式："
@@ -230,8 +224,7 @@ BASE_DOWNLOAD_URL="https://repo.anaconda.com/miniconda"
 # 安装路径
 INSTALL_PATH="$HOME/miniconda3"
 # 初始化
-POST_INSTALL_INIT="source $HOME/.bashrc"
-
+POST_INSTALL_INIT="source $HOME/bin/activate && conda init all"
 
 # 系统检测
 if ! grep -q "Arch Linux" /etc/os-release && ! grep -q "arch" /etc/os-release; then
@@ -268,58 +261,67 @@ install_miniconda() {
     exit 1
   fi
 
-  # 安装脚本
+  # 安装
   echo "正在安装 Miniconda3 到 $INSTALL_PATH..."
   bash miniconda.sh -b -p "$INSTALL_PATH"
   echo "Miniconda3 安装完成！"
 }
 
-echo "检测到系统：Arch Linux ($ARCH)"
 install_miniconda
 source ~/miniconda3/bin/activate
 conda init --all
 conda create -n qqbot python=3.13 --yes
-wget https://github.com/zhende1113/Antlia/blob/main/Eridanus-install.sh
-chmod +x Eridanus-install.sh
-./Eridanus-install.sh
-wget https://github.com/zhende1113/Antlia/blob/main/SetUP.sh
-chmod +x SetUP.sh
+conda activate qqbot
 
+
+wget https://ghfast.top/https://github.com/zhende1113/Antlia/blob/main/start.sh
+chmod +x start.sh
+
+cd Eridanus
+
+# 安装依赖
+pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
+pip install --user --upgrade pip && pip install -r requirements.txt
+pip3 install audioop-lts
 echo "安装完成😋"
 echo "1. WebUI配置: http://127.0.0.1:6099/webui?token=napcat
 2. 启动环境: source ~/miniconda3/envs/qqbot/bin/activate
-3. 运行项目:
+3. 运行项目: 
 cd Eridanus
 python main.py
 更新
 source activate qqbot
 cd Eridanus
-python tool.py
+python launch.py
 如果启动的时候报错请执行 指的是第一次启动
 pip3 install audioop-lts
-启动脚本 ./SetUP.sh
+
 项目地址 https://github.com/avilliai/Eridanus/releases
 官方文档 https://eridanus-doc.netlify.app
 官方群聊 913122269
 "
-elif [[ $choice =~ ^[Nn]$ ]]; then
-    # 非Arch Linux流程
-    if $IS_ARCH; then
-        echo "警告：当前系统是Arch Linux，建议选择y选项"
-    fi
-
-    echo "该脚本的项目地址为：https://gitee.com/laixi_lingdun/eridanus_deploy"
-    echo "正在下载安装脚本..."
-
-    wget install.sh https://gitee.com/laixi_lingdun/eridanus_deploy/raw/master/install.sh
-
-    echo "正在赋予脚本权限..."
+elif command -v apt &> /dev/null || command -v yum &> /dev/null || command -v dnf &> /dev/null; then
+    # 执行
+    echo "该脚本的项目地址为：https://gitee.com/laixi_lingdun/eridanus_deploy" | tee -a "$LOG_FILE"
+    echo "正在下载安装脚本..." | tee -a "$LOG_FILE"
+    
+    wget -qO install.sh https://gitee.com/laixi_lingdun/eridanus_deploy/raw/master/install.sh || {
+        echo "错误：下载安装脚本失败" >> "$LOG_FILE"
+        exit 1
+    }
+    
+    echo "正在赋予脚本权限..." | tee -a "$LOG_FILE"
     chmod +x install.sh
-
-    echo "正在运行脚本..."
-    ./install.sh
-
+    
+    echo "正在运行脚本..." | tee -a "$LOG_FILE"
+    ./install.sh || {
+        echo "错误：执行安装脚本失败" >> "$LOG_FILE"
+        exit 1
+    }
+    
 else
-    echo "错误：无效输入"
+    echo "错误：不支持的软件包管理器" >> "$LOG_FILE"
     exit 1
 fi
+
+echo "安装完成，日志已保存至 $LOG_FILE"
