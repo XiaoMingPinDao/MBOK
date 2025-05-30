@@ -1,7 +1,7 @@
 #!/bin/bash
 LOG_FILE="Eridanus-install_log.txt"
 
-# 检测包管理器
+# 检测
 if command -v pacman &> /dev/null; then
 echo "
 Eridanus部署脚本
@@ -270,7 +270,7 @@ install_miniconda() {
 install_miniconda
 source ~/miniconda3/bin/activate
 conda init --all
-conda create -n qqbot python=3.13 --yes
+conda create -n qqbot python=3.14 --yes
 conda activate qqbot
 
 
@@ -325,3 +325,10 @@ else
 fi
 
 echo "安装完成，日志已保存至 $LOG_FILE"
+
+
+
+
+
+#更新日志
+#v1.04 替换原有的检查逻辑 改为检查软件包管理器
