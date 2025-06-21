@@ -65,7 +65,7 @@ conda install pip
 wget https://mirror.ghproxy.com/https://github.com/zhende1113/Antlia/blob/main/start.sh
 chmod +x start.sh
 cd Eridanus
-
+wget https://mirror.ghproxy.com/https://github.com/zhende1113/Antlia/blob/main/config.py
 # 安装依赖
 pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
 pip install --user --upgrade pip && pip install -r requirements.txt
