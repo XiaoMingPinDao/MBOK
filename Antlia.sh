@@ -290,7 +290,7 @@ generate_start_script() {
     print_title "生成启动脚本"
     
     cd "$SCRIPT_DIR"
-    wget -O start.sh https://cnb.cool/zhende1113/Antlia/-/git/raw/main/Script/Eridanus/start.sh
+    wget -O start.sh https://github.com/zhende1113/Antlia/raw/refs/heads/main/start.sh
     chmod +x start.sh
     
     ok "启动脚本已生成"
