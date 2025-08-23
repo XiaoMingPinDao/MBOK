@@ -23,10 +23,23 @@
 ### 1. 下载脚本
 
 ```bash
-# 下载部署脚本
-wget -O Antlia.sh https://github.com/zhende1113/Antlia/raw/refs/heads/main/Antlia.sh
+# 下载通用版部署脚本 实验性
+wget -O Antlia.sh https://github.com/zhende1113/Antlia/raw/refs/heads/main/Script/Eridanus/other/Antlia.sh
 chmod +x Antlia.sh
 ```
+
+```bash
+# 下载archlinux部署脚本 
+wget -O Antlia.sh https://github.com/zhende1113/Antlia/raw/refs/heads/main/Script/Eridanus/ArchLinux/Antlia.sh
+chmod +x Antlia.sh
+```
+
+```bash
+# 下载archlinux部署脚本 
+wget -O Antlia.sh  https://github.com/zhende1113/Antlia/raw/refs/heads/main/Antlia-docker.sh
+chmod +x Antlia.sh
+```
+
 
 ### 2. 运行部署
 
@@ -134,11 +147,10 @@ screen -r eridanus-lagrange
 
 ## ⚠️ 注意事项
 
-1. **系统限制**：仅支持 Arch Linux 系统
-2. **权限要求**：需要 sudo 权限安装系统包
-3. **网络要求**：确保网络连接稳定，建议使用代理源
-4. **首次登录**：Lagrange 首次运行需要扫码登录
-5. **服务管理**：建议使用提供的管理界面操作服务
+1. **权限要求**：需要 sudo 权限安装系统包
+2. **网络要求**：确保网络连接稳定，建议使用代理源
+3. **首次登录**：Lagrange 首次运行需要扫码登录
+4. **服务管理**：建议使用提供的管理界面操作服务
 
 ## 🛠️ 故障排除
 
@@ -187,6 +199,4 @@ conda env remove -n Eridanus
 
 ---
 
-**版本**：2025/08/20  
-**支持系统**：Arch Linux (x86_64)  
-**协议端**：Lagrange
+**版本**：2025/08/23  

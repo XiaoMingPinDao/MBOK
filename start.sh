@@ -3,7 +3,7 @@
 # Eridanus 启动脚本 - 专为 Arch Linux (pacman) 优化
 # 版本: 2025/08/20
 
-set -o pipefail
+#set -o pipefail
 
 # =============================================================================
 # 路径与常量定义
@@ -188,7 +188,7 @@ main_menu() {
     while true; do
         clear
         echo "================================================"
-        echo "       Eridanus 管理面板 - Arch Linux 版"
+        echo "       Eridanus 管理面板"
         echo "    用户: $CURRENT_USER | 时间: $(date '+%Y-%m-%d %H:%M:%S')"
         echo "================================================"
         echo "主菜单:"
@@ -197,7 +197,7 @@ main_menu() {
         hr
         echo "  3. 管理 Eridanus"
         if [[ "$LAGRANGE_DEPLOYED" -eq 1 ]]; then
-            echo "  4. 管理 Lagrange"
+            echo "  4. 管理 Lagrange.OneBot"
         fi
         hr
         echo "  q. 退出脚本"
@@ -280,7 +280,7 @@ eridanus_menu() {
 lagrange_menu() {
     while true; do
         clear
-        print_title "管理 Lagrange"
+        print_title "管理 Lagrange.OneBot"
         hr
         echo "  1. 启动并进入交互会话 (扫码)"
         echo "  2. 启动 (仅后台运行)"
@@ -337,16 +337,16 @@ main() {
     source "$DEPLOY_STATUS_FILE"
     
     # 检查系统是否为 Arch Linux
-    if ! command -v pacman &>/dev/null; then
-        err "本脚本仅支持 Arch Linux 系统"
-        exit 1
-    fi
+    #if ! command -v pacman &>/dev/null; then
+    #    err "本脚本仅支持 Arch Linux 系统"
+    #    exit 1
+    #fi
     
     # 创建日志目录
     mkdir -p "$LOG_DIR"
     
     # 检查必需命令
-    check_command tmux screen conda xvfb-run pkill
+    check_command tmux screen conda pkill
     
     # 激活 Conda 环境
     activate_environment
