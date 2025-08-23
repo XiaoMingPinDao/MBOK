@@ -1,8 +1,14 @@
 FROM python:3.11-slim AS builder
 
-# 安装系统依赖
+# 安装系统依赖（包括 cairo 依赖）
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        build-essential git curl ca-certificates \
+        build-essential \
+        libcairo2-dev \
+        libpango1.0-dev \
+        libglib2.0-dev \
+        git \
+        curl \
+        ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 # 下载并安装 Python 依赖
