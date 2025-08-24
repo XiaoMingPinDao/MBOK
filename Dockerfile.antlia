@@ -1,14 +1,11 @@
 # =================================================================
-# Antlia 通用 Dockerfile - 用于手动 exec 管理)
+# Antlia 通用 Dockerfile (FINAL - 包含用户修复和挂起模式)
 # =================================================================
 
 # 1. 基础镜像
 FROM python:3.11-slim-bookworm
 
 # 2. 基础镜像和系统准备 (以 root 用户身份)
-# - 更新包列表
-# - 安装 sudo 和其他部署脚本必需的依赖
-# - 清理 apt 缓存以减小镜像体积
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     sudo \
@@ -17,28 +14,23 @@ RUN apt-get update && \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-# 3. 创建 Antlia 用户并配置免密 sudo (仍然以 root 用户身份)
-# - 创建一个名为 Antlia 的系统用户
-# - 将 Antlia 用户添加到 sudo 组
-# - 创建 sudoers 配置文件，赋予 Antlia 用户所有命令的免密 sudo 权限
-# - 设置 sudoers 配置文件的正确权限 (0440)
-RUN adduser --system --group --disabled-password --shell /bin/bash Antlia && \
+# 3. 创建 antlia 用户并配置免密 sudo (以 root 用户身份)
+# **注意：用户名为全小写 'antlia' 以避免 Bookworm 系统的命名限制**
+RUN adduser --system --group --disabled-password --shell /bin/bash antlia && \
     adduser antlia sudo && \
     echo 'antlia ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/90-antlia-nopasswd && \
     chmod 0440 /etc/sudoers.d/90-antlia-nopasswd
 
 # 4. 创建并设置工作目录
-# - 创建 /app 目录
-# - 将 /app 目录的所有权赋予新创建的 Antlia 用户
+# 目录所有权赋予 antlia
 RUN mkdir /app && chown -R antlia:antlia /app
 WORKDIR /app
 
-# 5. 切换到非 root 用户 (Antlia)
-# 从这里开始，所有的后续指令 (RUN, CMD, ENTRYPOINT) 都将以 Antlia 用户身份执行
+# 5. 切换到非 root 用户 (antlia)
 USER antlia
 
-# 6. 复制并执行部署脚本 (以 Antlia 用户身份)
-# - 部署脚本会安装所有依赖、克隆代码、生成 start.sh
+# 6. 复制并执行部署脚本 (以 antlia 用户身份)
+# 脚本文件名为 Antlia-docker-script.sh
 COPY --chown=antlia:antlia Antlia-docker-script.sh .
 RUN ./Antlia-docker-script.sh
 
@@ -46,8 +38,5 @@ RUN ./Antlia-docker-script.sh
 ENV TZ=Asia/Shanghai
 EXPOSE 5007
 
-# 8. 修改：设置一个“挂起”命令，让容器持续运行
-# Docker 容器需要一个前台进程来保持运行状态。
-# `tail -f /dev/null` 是一个标准的技巧，它会永远等待，几乎不消耗任何资源。
-# 这使得容器启动后会一直处于运行状态，等待我们通过 `docker exec` 进入。
+# 8. 设置“挂起”命令，让容器持续运行
 CMD ["tail", "-f", "/dev/null"]
