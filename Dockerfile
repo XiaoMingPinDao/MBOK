@@ -10,12 +10,12 @@ WORKDIR /app
 
 # 3. 复制部署脚本
 # 脚本将负责克隆源码和安装所有依赖
-COPY docker-deploy.sh .
+COPY Eridanus-docker_build-Antlia.sh .
 
 # 4. 执行部署脚本
 # 赋予脚本执行权限，然后运行它
-RUN chmod +x docker-deploy.sh && \
-    ./docker-deploy.sh
+RUN chmod +x Eridanus-docker_build-Antlia.sh && \
+    ./Eridanus-docker_build-Antlia.sh
 
 # 5. 设置环境变量和端口
 ENV TZ=Asia/Shanghai
