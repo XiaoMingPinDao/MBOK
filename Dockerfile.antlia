@@ -1,5 +1,5 @@
 # =================================================================
-# Antlia 通用 Dockerfile (V3 - 用于手动 exec 管理)
+# Antlia 通用 Dockerfile - 用于手动 exec 管理)
 # =================================================================
 
 # 1. 基础镜像
@@ -23,23 +23,23 @@ RUN apt-get update && \
 # - 创建 sudoers 配置文件，赋予 Antlia 用户所有命令的免密 sudo 权限
 # - 设置 sudoers 配置文件的正确权限 (0440)
 RUN adduser --system --group --disabled-password --shell /bin/bash Antlia && \
-    adduser Antlia sudo && \
-    echo 'Antlia ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/90-antlia-nopasswd && \
+    adduser antlia sudo && \
+    echo 'antlia ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/90-antlia-nopasswd && \
     chmod 0440 /etc/sudoers.d/90-antlia-nopasswd
 
 # 4. 创建并设置工作目录
 # - 创建 /app 目录
 # - 将 /app 目录的所有权赋予新创建的 Antlia 用户
-RUN mkdir /app && chown -R Antlia:Antlia /app
+RUN mkdir /app && chown -R antlia:antlia /app
 WORKDIR /app
 
 # 5. 切换到非 root 用户 (Antlia)
 # 从这里开始，所有的后续指令 (RUN, CMD, ENTRYPOINT) 都将以 Antlia 用户身份执行
-USER Antlia
+USER antlia
 
 # 6. 复制并执行部署脚本 (以 Antlia 用户身份)
 # - 部署脚本会安装所有依赖、克隆代码、生成 start.sh
-COPY --chown=Antlia:Antlia Antlia-docker-script.sh .
+COPY --chown=antlia:antlia Antlia-docker-script.sh .
 RUN ./Antlia-docker-script.sh
 
 # 7. 设置环境变量和端口
