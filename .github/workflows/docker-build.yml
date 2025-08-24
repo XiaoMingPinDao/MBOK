@@ -1,4 +1,9 @@
-name: Docker Build & Push
+# =================================================================
+# GitHub Actions 工作流：
+# 自动构建并推送两个不同用途的 Docker 镜像
+# =================================================================
+
+name: Build and Push Both Docker Images
 
 on:
   push:
@@ -8,22 +13,50 @@ on:
 
 jobs:
   build-and-push:
+    name: Build and Push to Docker Hub
     runs-on: ubuntu-latest
 
     steps:
-      # 1. 检出 Antlia 仓库
+      # 步骤 1：检出代码
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      # 2. 设置 Docker 登录
+      # 步骤 2：登录到 Docker Hub
       - name: Log in to Docker Hub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # 3. 构建并推送 Docker 镜像
-      - name: Build and Push Docker image
+      # 步骤 3：构建并推送 Antlia 镜像
+      - name: Build and Push Antlia Image (:latest)
         run: |
-          docker build -t zhende1113/eridanus-docker-unofficial:latest .
-          docker push zhende1113/eridanus-docker-unofficial:latest
+          IMAGE_NAME="zhende1113/antlia"  # 你的 Docker Hub 镜像名
+          echo "Building Auto-run image from Dockerfile.autorun"
+          
+          # 使用 -f 指定 Dockerfile.autorun
+          # 同时打上 latest 和日期标签
+          docker build \
+            -f Dockerfile.antlia \
+            -t "${IMAGE_NAME}:latest" \
+            -t "${IMAGE_NAME}:$(date +%Y%m%d)" \
+            .
+            
+          # 推送所有标签 (latest 和 日期)
+          docker push --all-tags "${IMAGE_NAME}"
+
+      # 步骤 4：构建并推送 eridanus-docker-unofficial镜像
+      - name: Build and Push Manual-exec Image (:latest-manual)
+        run: |
+          IMAGE_NAME="zhende1113/eridanus-docker-unofficial"  # 你的 Docker Hub 镜像名
+          echo "Building Manual-exec image from Dockerfile.manual"
+          
+          # 使用 -f 指定 Dockerfile
+          # 打上一个清晰的、表示用途的标签，例如 'latest-manual'
+          docker build \
+            -f Dockerfile \
+            -t "${IMAGE_NAME}:latest-manual" \
+            .
+          
+          # 推送这个特定的 manual 标签
+          docker push "${IMAGE_NAME}:latest-manual"
