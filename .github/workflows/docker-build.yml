@@ -11,8 +11,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+<<<<<<< HEAD
       # 1. 检出 Antlia 仓库
       - name: Checkout Repository
+=======
+      # 1. 检出仓库
+      - name: Checkout repo
+>>>>>>> d0b7d369ea0940a79c462b0b105af4d50a8b398c
         uses: actions/checkout@v3
 
       # 2. 设置 Docker 登录
@@ -22,8 +27,25 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+<<<<<<< HEAD
       # 3. 构建并推送 Docker 镜像
       - name: Build and Push Docker image
         run: |
           docker build -t zhende1113/eridanus-docker-unofficial:latest .
           docker push zhende1113/eridanus-docker-unofficial:latest
+=======
+      # 3. 下载 requirements.txt 文件
+      - name: Download requirements.txt
+        run: |
+          curl -L https://github.com/AOrbitron/Eridanus/raw/refs/heads/master/requirements.txt -o requirements.txt
+
+      # 4. 构建 Docker 镜像
+      - name: Build Docker image
+        run: |
+          docker build -t zhende1113/eridanus-docker-unofficial:latest .
+
+      # 5. 推送到 Docker Hub
+      - name: Push Docker image
+        run: |
+          docker push zhende1113/eridanus-docker-unofficial:latest
+>>>>>>> d0b7d369ea0940a79c462b0b105af4d50a8b398c
