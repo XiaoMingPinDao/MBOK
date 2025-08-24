@@ -1,7 +1,7 @@
-#!/bin/sh
+#!/bin/bash
 
 # Eridanus Docker 内部专用部署脚本
-# 在一个轻量级的 Alpine 环境中运行
+# 在一个 Debian-based (slim) 环境中运行
 
 set -e
 
@@ -14,15 +14,15 @@ info "开始在 Docker 内部执行部署..."
 # =============================================================================
 # 1. 安装系统依赖
 # =============================================================================
-info "安装系统依赖 (使用 apk)..."
+info "安装系统依赖 (使用 apt-get)..."
 
-# build-base 包含 gcc, make 等编译工具
-# python3-dev 包含 Python 的头文件，某些库编译时需要
+# build-essential 包含 gcc, make 等编译工具
+# python3-dev 包含 Python 的头文件
 # git 用于克隆源码
-apk add --no-cache \
-    build-base \
+apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
     python3-dev \
-    redis \
+    redis-server \
     curl \
     ca-certificates \
     git || err "系统依赖安装失败"
@@ -58,6 +58,10 @@ else
     err "在 /app/Eridanus/ 中未找到 requirements.txt"
 fi
 
+info "安装 Playwright 浏览器依赖..."
+# --with-deps 会自动使用 apt-get 安装所有浏览器依赖
+playwright install --with-deps || err "Playwright 浏览器安装失败"
+
 deactivate
 ok "Python 环境配置完成。"
 
@@ -66,7 +70,8 @@ ok "Python 环境配置完成。"
 # =============================================================================
 info "清理不必要的编译工具和 git..."
 
-apk del build-base python3-dev git || warn "清理编译工具失败，可忽略"
+apt-get purge -y --auto-remove build-essential python3-dev git
+rm -rf /var/lib/apt/lists/*
 
 ok "清理完成。"
 

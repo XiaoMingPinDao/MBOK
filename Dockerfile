@@ -1,9 +1,9 @@
 # Antlia 轻量化 Dockerfile
-# 使用 Alpine Linux 和一个 独立的部署脚本
+# 使用 Debian-slim 和一个独立的部署脚本
 
 # 1. 基础镜像
-# 使用官方的 Python 3.11 Alpine 镜像，非常轻量
-FROM python:3.11-alpine
+# 更换为兼容性更好的 slim 版本以支持 playwright
+FROM python:3.11-slim-bookworm
 
 # 2. 设置工作目录
 WORKDIR /app
