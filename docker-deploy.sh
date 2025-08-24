@@ -19,13 +19,16 @@ info "安装系统依赖 (使用 apt-get)..."
 # build-essential 包含 gcc, make 等编译工具
 # python3-dev 包含 Python 的头文件
 # git 用于克隆源码
+# pkg-config 和 libcairo2-dev 用于构建 pycairo
 apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     python3-dev \
     redis-server \
     curl \
     ca-certificates \
-    git || err "系统依赖安装失败"
+    git \
+    pkg-config \
+    libcairo2-dev || err "系统依赖安装失败"
 
 ok "系统依赖安装完成。"
 
@@ -70,7 +73,7 @@ ok "Python 环境配置完成。"
 # =============================================================================
 info "清理不必要的编译工具和 git..."
 
-apt-get purge -y --auto-remove build-essential python3-dev git
+apt-get purge -y --auto-remove build-essential python3-dev git pkg-config libcairo2-dev
 rm -rf /var/lib/apt/lists/*
 
 ok "清理完成。"
