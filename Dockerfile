@@ -1,33 +1,26 @@
-# 构建阶段：安装依赖和源码（仅用于第一次复制）
-FROM python:3.11-slim AS builder
+# Antlia 轻量化 Dockerfile
+# 使用 Alpine Linux 和一个独立的部署脚本
 
-# 安装依赖工具
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential redis-server curl ca-certificates git \
-    && rm -rf /var/lib/apt/lists/*
+# 1. 基础镜像
+# 使用官方的 Python 3.11 Alpine 镜像，非常轻量
+FROM python:3.11-alpine
 
-# 安装 Python 依赖
-COPY requirements.txt /tmp/requirements.txt
-RUN pip install --upgrade pip && pip install --no-cache-dir -r /tmp/requirements.txt
-
-# 克隆源码到 /app/Eridanus（仅第一次复制用）
-RUN git clone https://github.com/AOrbitron/Eridanus.git /app/Eridanus
-
-# 运行阶段：仅保留依赖
-FROM python:3.11-slim
-
-# 安装运行所需依赖（Redis + 系统库）
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    redis-server curl ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
-
-# 复制 Python 包和第一次复制用的源码
-COPY --from=builder /usr/local /usr/local
-COPY --from=builder /app/Eridanus /app/Eridanus
-
+# 2. 设置工作目录
 WORKDIR /app
-ENV PYTHONPATH=/usr/local/lib/python3.11/site-packages
-ENV TZ=Asia/Shanghai
 
+# 3. 复制部署脚本
+# 脚本将负责克隆源码和安装所有依赖
+COPY docker-deploy.sh .
+
+# 4. 执行部署脚本
+# 赋予脚本执行权限，然后运行它
+RUN chmod +x docker-deploy.sh && \
+    ./docker-deploy.sh
+
+# 5. 设置环境变量和端口
+ENV TZ=Asia/Shanghai
 EXPOSE 5007
-CMD ["python", "/app/main.py"]
+
+# 6. 设置启动命令
+# 注意：这里的 python 来自于脚本创建的 venv 虚拟环境
+CMD ["/app/venv/bin/python", "Eridanus/main.py"]
