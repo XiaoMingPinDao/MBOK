@@ -7,8 +7,15 @@ FROM python:3.11-slim-bookworm
 
 # 2. 基础镜像和系统准备 (以 root 用户身份)
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends sudo curl wget git && \
-    rm -rf /var/lib/apt/lists/*
+    apt-get install -y --no-install-recommends \
+    sudo \
+    curl \
+    wget \
+    git \
+    build-essential \
+    libcairo2-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 
 # 3. 创建 antlia 用户并配置免密 sudo (仍然以 root 用户身份)
 RUN adduser --system --group --disabled-password --shell /bin/bash antlia && \
