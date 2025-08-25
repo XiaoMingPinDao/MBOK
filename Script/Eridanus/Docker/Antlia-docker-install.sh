@@ -59,33 +59,39 @@ sudo docker pull "$IMAGE"
 # 生成启动脚本
 cat > Antlia-docker.sh <<'EOF'
 #!/bin/bash
-IMAGE="zhende1113/antlia"
-CONTAINER_NAME="antlia"
-HOST_DIR="$(pwd)/Antlia-Docker"
-CONTAINER_DIR="/app/bot"
+IMAGE="zhende1113/antlia:latest"
+CONTAINER_NAME="antlia-prod"
+VOLUME_NAME="antlia-bot-data"
 
 case "$1" in
     start)
         echo "[启动] 容器 $CONTAINER_NAME"
-        sudo docker run -dit --name $CONTAINER_NAME \
-            -v "$HOST_DIR":"$CONTAINER_DIR" \
-            $IMAGE tail -f /dev/null
+        docker run -d \
+            --name $CONTAINER_NAME \
+            -v $VOLUME_NAME:/app/bot \
+            -p 5007:5007 \
+            --restart always \
+            $IMAGE
         ;;
     stop)
         echo "[停止] 容器 $CONTAINER_NAME"
-        sudo docker stop $CONTAINER_NAME
-        sudo docker rm $CONTAINER_NAME
+        docker stop $CONTAINER_NAME
+        docker rm $CONTAINER_NAME
         ;;
     exec)
         echo "[进入容器] $CONTAINER_NAME"
-        sudo docker exec -it $CONTAINER_NAME /bin/bash
+        docker exec -it $CONTAINER_NAME /bin/bash
         ;;
     run)
         echo "[执行] start.sh"
-        sudo docker exec -it $CONTAINER_NAME bash /app/start.sh
+        docker exec -it $CONTAINER_NAME bash /app/start.sh
+        ;;
+    logs)
+        echo "[日志] $CONTAINER_NAME"
+        docker logs -f $CONTAINER_NAME
         ;;
     *)
-        echo "用法: ./Antlia-docker.sh {start|stop|exec|run}"
+        echo "用法: sudo ./Antlia-docker.sh {start|stop|exec|run|logs}"
         ;;
 esac
 EOF
