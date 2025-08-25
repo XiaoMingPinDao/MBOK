@@ -34,7 +34,7 @@ echo    docker stop %%CONTAINER_NAME%%
 echo ) else if "%%1"=="exec" (
 echo    docker exec -it %%CONTAINER_NAME%% cmd
 echo ) else if "%%1"=="run" (
-echo    docker exec -it %%CONTAINER_NAME%% bash /app/bot/start.sh
+echo    docker exec -it %%CONTAINER_NAME%% bash /app/start.sh
 echo ) else (
 echo    echo 用法: Antlia-docker.bat ^<start^|stop^|exec^|run^>
 echo )

@@ -79,7 +79,7 @@ case "$1" in
         ;;
     run)
         echo "[执行] start.sh"
-        sudo docker exec -it $CONTAINER_NAME bash /app/bot/start.sh
+        sudo docker exec -it $CONTAINER_NAME bash /app/start.sh
         ;;
     *)
         echo "用法: ./Antlia-docker.sh {start|stop|exec|run}"
