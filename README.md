@@ -38,7 +38,7 @@ chmod +x Antlia.sh
 # 下载docker部署脚本 
 wget -O Antlia-Docker-install.sh  https://github.com/zhende1113/Antlia/raw/refs/heads/main/Script/Eridanus/Docker/Antlia-docker-install.sh
 chmod +x Antlia-Docker-install.sh
-bash Antlia-Docker-install
+bash Antlia-Docker-install.sh
 ```
 
 
