@@ -54,7 +54,7 @@ mkdir -p "$HOST_DIR"
 
 # 拉取镜像
 echo "[信息] 拉取镜像 $IMAGE..."
-docker pull "$IMAGE"
+sudo docker pull "$IMAGE"
 
 # 生成启动脚本
 cat > Antlia-docker.sh <<'EOF'
@@ -67,19 +67,19 @@ CONTAINER_DIR="/app/bot"
 case "$1" in
     start)
         echo "[启动] 容器 $CONTAINER_NAME"
-        docker run -dit --name $CONTAINER_NAME             -v "$HOST_DIR":"$CONTAINER_DIR"             $IMAGE
+        sudo docker run -dit --name $CONTAINER_NAME             -v "$HOST_DIR":"$CONTAINER_DIR"             $IMAGE
         ;;
     stop)
         echo "[停止] 容器 $CONTAINER_NAME"
-        docker stop $CONTAINER_NAME
+        sudo docker stop $CONTAINER_NAME
         ;;
     exec)
         echo "[进入容器] $CONTAINER_NAME"
-        docker exec -it $CONTAINER_NAME /bin/bash
+        sudo docker exec -it $CONTAINER_NAME /bin/bash
         ;;
     run)
         echo "[执行] start.sh"
-        docker exec -it $CONTAINER_NAME bash /app/bot/start.sh
+        sudo docker exec -it $CONTAINER_NAME bash /app/bot/start.sh
         ;;
     *)
         echo "用法: ./Antlia-docker.sh {start|stop|exec|run}"
