@@ -117,6 +117,37 @@ start_all_interactive() {
     ok "启动流程已完成！"
 }
 
+view_eridanus_log() {
+    LOG_FILE="$DEPLOY_DIR/Eridanus/log/$(date '+%Y-%m-%d').log"
+    if [[ -f "$LOG_FILE" ]]; then
+        less "$LOG_FILE"
+    else
+        warn "日志文件未找到: $LOG_FILE"
+        # 尝试查找目录中的任何日志文件
+        LOG_FILES=($(find "$DEPLOY_DIR/Eridanus/log" -name "*.log" 2>/dev/null | sort -r))
+        if [[ ${#LOG_FILES[@]} -gt 0 ]]; then
+            info "找到以下日志文件:"
+            for i in "${!LOG_FILES[@]}"; do
+                echo "  $((i+1)). $(basename "${LOG_FILES[i]}")"
+            done
+            read -rp "选择要查看的文件 (1-${#LOG_FILES[@]}): " log_choice
+            if [[ "$log_choice" =~ ^[0-9]+$ ]] && [[ "$log_choice" -ge 1 ]] && [[ "$log_choice" -le ${#LOG_FILES[@]} ]]; then
+                less "${LOG_FILES[$((log_choice-1))]}"
+            fi
+        else
+            warn "未找到任何日志文件"
+        fi
+    fi
+}
+
+
+
+
+
+
+
+
+
 # =============================================================================
 # 菜单界面
 # =============================================================================
@@ -149,14 +180,37 @@ main_menu() {
     done
 }
 
+
+# 添加附加到 tmux 会话的函数
+attach_eridanus_session() {
+    if tmux has-session -t "$TMUX_SESSION_ERIDANUS" 2>/dev/null; then
+        info "即将附加到 Eridanus tmux 会话..."
+        echo "【重要提示】分离会话: 按 Ctrl+b, 然后按 d 键"
+        echo "【重要提示】如需停止程序: 按 Ctrl+c"
+        hr
+        sleep 3
+        clear
+        tmux attach-session -t "$TMUX_SESSION_ERIDANUS"
+        clear
+        ok "已从 Eridanus tmux 会话分离"
+    else
+        warn "Eridanus tmux 会话 '$TMUX_SESSION_ERIDANUS' 不存在或未运行"
+        info "请先启动 Eridanus (后台模式)"
+    fi
+}
+
+
+
+# 更新后的 eridanus_menu 函数
 eridanus_menu() {
     while true; do
         clear; print_title "管理 Eridanus"; hr
         echo "  1. 启动 (后台)"
         echo "  2. 启动 (前台调试)"
         echo "  3. 停止"
-        echo "  4. 执行 tool.py (更新/工具)" # <-- 新增选项
-        echo "  5. 查看日志"                 # <-- 序号顺延
+        echo "  4. 附加到 tmux 会话 (查看运行状态)"  # <-- 新增选项
+        echo "  5. 执行 tool.py (更新/工具)"
+        echo "  6. 查看日志"
         echo "  q. 返回主菜单"
         
         read -rp "请选择: " choice
@@ -168,7 +222,7 @@ eridanus_menu() {
             2) 
                 info "即将前台启动 Eridanus... 按 Ctrl+C 停止"
                 sleep 2; clear
-                (cd "$DEPLOY_DIR/Eridanus" && source "$VENV_DIR/bin/activate" && python main.py)
+                (cd "$DEPLOY_DIR/Eridanus" && "$PYTHON_EXEC" main.py)
                 read -rp "Eridanus 已停止，按 Enter 返回..."
                 ;;
             3) 
@@ -176,28 +230,54 @@ eridanus_menu() {
                 read -rp "按 Enter 返回..."
                 ;;
             4) # <-- 新增处理逻辑
+                attach_eridanus_session
+                read -rp "按 Enter 键返回..."
+                ;;
+            5) # <-- 原来的 tool.py 选项
                 info "即将前台执行 tool.py 更新脚本..."
                 sleep 1; clear
                 (
+                    export HOME=/app
+                    mkdir -p /app/.config/pip
+                    mkdir -p /app/.cache/pip
                     cd "$DEPLOY_DIR/Eridanus" && \
                     source "$VENV_DIR/bin/activate" && \
                     python tool.py
                 )
                 read -rp "tool.py 执行完毕，按 Enter 键返回..."
                 ;;
-            5) # <-- 序号顺延
-                less "$DEPLOY_DIR/Eridanus/log/$(date '+%Y-%m-%d').log"
+            6) # <-- 原来的查看日志选项
+                LOG_FILE="$DEPLOY_DIR/Eridanus/log/$(date '+%Y-%m-%d').log"
+                if [[ -f "$LOG_FILE" ]]; then
+                    less "$LOG_FILE"
+                else
+                    warn "日志文件未找到: $LOG_FILE"
+                    # 尝试查找任何日志文件
+                    LOG_FILES=($(find "$DEPLOY_DIR/Eridanus/log" -name "*.log" 2>/dev/null | sort -r))
+                    if [[ ${#LOG_FILES[@]} -gt 0 ]]; then
+                        info "找到以下日志文件:"
+                        for i in "${!LOG_FILES[@]}"; do
+                            echo "  $((i+1)). $(basename "${LOG_FILES[i]}")"
+                        done
+                        read -rp "选择要查看的文件 (1-${#LOG_FILES[@]}): " log_choice
+                        if [[ "$log_choice" =~ ^[0-9]+$ ]] && [[ "$log_choice" -ge 1 ]] && [[ "$log_choice" -le ${#LOG_FILES[@]} ]]; then
+                            less "${LOG_FILES[$((log_choice-1))]}"
+                        fi
+                    else
+                        warn "未找到任何日志文件"
+                    fi
+                fi
                 ;;
             q|Q) 
                 break
                 ;;
             *) 
                 warn "无效输入"
+                sleep 1
                 ;;
         esac
     done
 }
-
 lagrange_menu() {
     while true; do
         clear; print_title "管理 Lagrange.OneBot"; hr

@@ -29,7 +29,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       # 步骤 3：构建并推送 Antlia 镜像
-      - name: Build and Push Antlia Image (:latest)
+      - name: Build and Push antlia Image (:latest)
         run: |
           IMAGE_NAME="zhende1113/antlia"  # 你的 Docker Hub 镜像名
           echo "Building Auto-run image from Dockerfile.autorun"
@@ -46,7 +46,7 @@ jobs:
           docker push --all-tags "${IMAGE_NAME}"
 
       # 步骤 4：构建并推送 eridanus-docker-unofficial镜像
-      - name: Build and Push Manual-exec Image (:latest-manual)
+      - name: Build and Push eridanus-docker-unofficial (:latest-manual)
         run: |
           IMAGE_NAME="zhende1113/eridanus-docker-unofficial"  # 你的 Docker Hub 镜像名
           echo "Building Manual-exec image from Dockerfile.manual"

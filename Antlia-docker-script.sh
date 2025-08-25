@@ -132,7 +132,7 @@ install_package() {
 # =============================================================================
 install_system_dependencies() {
     print_title "安装系统依赖"
-    local packages=("redis" "tmux" "git" "curl" "wget" "tar" "jq" "screen")
+    local packages=("redis" "tmux" "git" "curl" "wget" "tar" "jq" "screen" 'ffmpeg')
     
     # 在 Dockerfile 中已安装 python3, 这里确保 venv 模块存在
     info "确保 python3-venv 存在..."
@@ -203,7 +203,7 @@ install_python_dependencies() {
     else
         warn "未找到 requirements.txt"
     fi
-    
+    playwright install-deps chromium || err "Playwright 依赖安装失败"
     deactivate
     ok "Python 依赖已安装"
 }
