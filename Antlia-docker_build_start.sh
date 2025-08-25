@@ -1,30 +1,28 @@
 #!/bin/bash
 
-# Eridanus 启动脚本 - VENV 环境优化版
-# 版本: 2025/08/24 (新增 tool.py 选项)
+# Eridanus 启动脚本 - 安全 VENV 版
+# 版本: 2025/08/25
 
 set -o pipefail
 
 # =============================================================================
-# 路径与常量定义
+# 环境初始化
 # =============================================================================
+: "${TERM:=xterm-256color}"
+export TERM
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DEPLOY_DIR="$SCRIPT_DIR/bot"
 LOG_DIR="$DEPLOY_DIR/logs"
-VENV_DIR="$DEPLOY_DIR/venv" # VENV 路径
-PYTHON_EXEC="$VENV_DIR/bin/python" # VENV 中的 Python 解释器
+VENV_DIR="$DEPLOY_DIR/venv"
+PYTHON_EXEC="$VENV_DIR/bin/python"
 DEPLOY_STATUS_FILE="$DEPLOY_DIR/deploy.status"
 
-# 日志文件路径
 LAGRANGE_LOG_FILE="$LOG_DIR/lagrange.log"
-
-# 会话名称
 TMUX_SESSION_ERIDANUS="eridanus-main"
 SCREEN_SESSION_LAGRANGE="eridanus-lagrange"
-
-# 全局变量
 CURRENT_USER=$(whoami)
-LAGRANGE_DEPLOYED=0
+LAGRANGE_DEPLOYED=1
 
 # =============================================================================
 # 日志函数
@@ -37,7 +35,19 @@ print_title() { echo -e "\n=== $1 ==="; }
 hr() { echo "================================================"; }
 
 # =============================================================================
-# 工具函数
+# 安全读取（兼容非交互环境）
+# =============================================================================
+safe_read() {
+    if [ -t 0 ]; then
+        read -rp "$1" REPLY
+    else
+        echo "[INFO] 非交互环境，自动跳过输入: $1"
+        REPLY=""
+    fi
+}
+
+# =============================================================================
+# 命令检查
 # =============================================================================
 check_command() {
     for cmd in "$@"; do
@@ -49,61 +59,79 @@ check_command() {
 }
 
 # =============================================================================
-# 服务管理
+# 服务管理函数
 # =============================================================================
 stop_service() {
-    local service_name="$1"
-    info "正在停止 '$service_name'..."
-    case "$service_name" in
+    local service="$1"
+    info "正在停止 $service..."
+    case "$service" in
         Eridanus) tmux kill-session -t "$TMUX_SESSION_ERIDANUS" 2>/dev/null ;;
         Lagrange) pkill -f "Lagrange.OneBot" 2>/dev/null; sleep 0.5; screen -wipe 2>/dev/null ;;
     esac
-    ok "'$service_name' 已停止"
+    ok "$service 已停止"
 }
 
 start_service_background() {
-    local type="$1"; local service_name="$2"; local session_name="$3"; local work_dir="$4"; local start_cmd="$5"
-    stop_service "$service_name"
-    info "正在后台启动 $service_name..."
-    if [[ ! -d "$work_dir" ]]; then err "$service_name 工作目录不存在"; return 1; fi
+    local type="$1" local service="$2" local session="$3" local work_dir="$4" local cmd="$5"
+    stop_service "$service"
+    info "正在后台启动 $service..."
+    [[ ! -d "$work_dir" ]] && { err "$service 工作目录不存在"; return 1; }
 
     if [[ "$type" == "tmux" ]]; then
-        # 直接使用 venv 中的 python，无需激活
-        tmux new-session -d -s "$session_name" "cd '$work_dir' && '$PYTHON_EXEC' main.py"
+        tmux new-session -d -s "$session" "cd '$work_dir' && '$PYTHON_EXEC' main.py"
     elif [[ "$type" == "screen" ]]; then
-        # 创建日志文件
         >"$LAGRANGE_LOG_FILE"
-        screen -dmS "$session_name" bash -c "cd '$work_dir' && ./$start_cmd > '$LAGRANGE_LOG_FILE' 2>&1"
+        screen -dmS "$session" bash -c "cd '$work_dir' && ./$cmd > '$LAGRANGE_LOG_FILE' 2>&1"
     fi
     sleep 1
-    ok "$service_name 已在后台启动"
+    ok "$service 已在后台启动"
 }
 
 start_service_interactive() {
-    local service_name="$1"; local session_name="$2"; local work_dir="$3"; local start_cmd="$4"
-    stop_service "$service_name"
-    info "正在启动 $service_name..."
-    hr; echo "您即将进入 $service_name 的实时会话 (用于扫码)"; echo "【重要】分离会话: 按住 Ctrl+a, 然后按 d 键"; hr
-    sleep 3; clear
-    screen -S "$session_name" bash -c "cd '$work_dir' && ./$start_cmd"
-    clear; ok "已从 $service_name 会话分离。服务仍在后台运行"
+    local service="$1" local session="$2" local work_dir="$3" local cmd="$4"
+    stop_service "$service"
+    info "正在启动 $service..."
+    hr; echo "您即将进入 $service 的实时会话"; hr
+    sleep 2; clear
+    screen -S "$session" bash -c "cd '$work_dir' && ./$cmd"
+    clear; ok "已从 $service 会话分离，服务仍在后台运行"
+}
+
+attach_eridanus_session() {
+    if tmux has-session -t "$TMUX_SESSION_ERIDANUS" 2>/dev/null; then
+        info "附加到 Eridanus tmux 会话..."
+        echo "分离会话: Ctrl+b, 然后 d 键"
+        sleep 1; clear
+        tmux attach-session -t "$TMUX_SESSION_ERIDANUS"
+        clear; ok "已分离 Eridanus 会话"
+    else
+        warn "Eridanus 会话不存在"
+    fi
+}
+
+attach_lagrange_session() {
+    if screen -list | grep -q "$SCREEN_SESSION_LAGRANGE"; then
+        info "附加到 Lagrange.OneBot screen 会话..."
+        echo "分离会话: Ctrl+a, 然后 d 键"
+        sleep 1; clear
+        screen -r "$SCREEN_SESSION_LAGRANGE"
+        clear; ok "已分离 Lagrange 会话"
+    else
+        warn "Lagrange.OneBot 会话不存在"
+    fi
 }
 
 # =============================================================================
 # 配置管理
 # =============================================================================
 switch_compatibility_to_lagrange() {
-    local config_file="$DEPLOY_DIR/Eridanus/run/common_config/basic_config.yaml"
-    [[ ! -f "$config_file" ]] && config_file="$DEPLOY_DIR/Eridanus/config/common_config/basic_config.yaml"
-    if [[ ! -f "$config_file" ]]; then warn "未找到 Eridanus 配置文件"; return; fi
-    # 假设用户有免密sudo权限
-    sudo sed -i 's/name:[[:space:]]*"any"/name: "Lagrange"/' "$config_file" 2>/dev/null || warn "切换 Lagrange 模式失败，可能需要 sudo 权限"
-    ok "已自动尝试切换到 [Lagrange] 兼容模式"
+    local cfg="$DEPLOY_DIR/Eridanus/run/common_config/basic_config.yaml"
+    [[ ! -f "$cfg" ]] && cfg="$DEPLOY_DIR/Eridanus/config/common_config/basic_config.yaml"
+    [[ ! -f "$cfg" ]] && { warn "未找到 Eridanus 配置文件"; return; }
+    sudo sed -i 's/name:[[:space:]]*"any"/name: "Lagrange"/' "$cfg" 2>/dev/null || warn "切换 Lagrange 模式失败"
+    ok "已尝试切换到 Lagrange 模式"
 }
 
-# =============================================================================
-# 综合启动流程
-# =============================================================================
 start_all_interactive() {
     print_title "启动所有服务"
     hr
@@ -114,43 +142,70 @@ start_all_interactive() {
     hr
     start_service_interactive "Lagrange" "$SCREEN_SESSION_LAGRANGE" "$DEPLOY_DIR/Lagrange" "Lagrange.OneBot"
     hr
-    ok "启动流程已完成！"
+    ok "启动完成！"
 }
 
 view_eridanus_log() {
-    LOG_FILE="$DEPLOY_DIR/Eridanus/log/$(date '+%Y-%m-%d').log"
-    if [[ -f "$LOG_FILE" ]]; then
-        less "$LOG_FILE"
+    local log_file="$DEPLOY_DIR/Eridanus/log/$(date '+%Y-%m-%d').log"
+    if [[ -f "$log_file" ]]; then
+        less "$log_file"
     else
-        warn "日志文件未找到: $LOG_FILE"
-        # 尝试查找目录中的任何日志文件
-        LOG_FILES=($(find "$DEPLOY_DIR/Eridanus/log" -name "*.log" 2>/dev/null | sort -r))
-        if [[ ${#LOG_FILES[@]} -gt 0 ]]; then
-            info "找到以下日志文件:"
-            for i in "${!LOG_FILES[@]}"; do
-                echo "  $((i+1)). $(basename "${LOG_FILES[i]}")"
-            done
-            read -rp "选择要查看的文件 (1-${#LOG_FILES[@]}): " log_choice
-            if [[ "$log_choice" =~ ^[0-9]+$ ]] && [[ "$log_choice" -ge 1 ]] && [[ "$log_choice" -le ${#LOG_FILES[@]} ]]; then
-                less "${LOG_FILES[$((log_choice-1))]}"
-            fi
-        else
-            warn "未找到任何日志文件"
-        fi
+        warn "日志文件未找到: $log_file"
     fi
 }
 
-
-
-
-
-
-
-
-
 # =============================================================================
-# 菜单界面
+# 菜单
 # =============================================================================
+eridanus_menu() {
+    while true; do
+        clear; print_title "管理 Eridanus"; hr
+        echo "  1. 启动 (后台)"
+        echo "  2. 启动 (前台调试)"
+        echo "  3. 停止"
+        echo "  4. 附加 tmux 会话"
+        echo "  5. 执行 tool.py 更新"
+        echo "  q. 返回主菜单"
+        safe_read "请选择: "
+        case "$REPLY" in
+            1) start_service_background "tmux" "Eridanus" "$TMUX_SESSION_ERIDANUS" "$DEPLOY_DIR/Eridanus" "main.py"; safe_read "按 Enter 返回..." ;;
+            2) info "前台启动 Eridanus"; sleep 1; clear; (cd "$DEPLOY_DIR/Eridanus" && "$PYTHON_EXEC" main.py); safe_read "按 Enter 返回..." ;;
+            3) stop_service "Eridanus"; safe_read "按 Enter 返回..." ;;
+            4) attach_eridanus_session; safe_read "按 Enter 返回..." ;;
+            5)
+                info "执行 tool.py..."
+                sleep 1; clear
+                (export HOME=/app; mkdir -p /app/.config/pip /app/.cache/pip; cd "$DEPLOY_DIR/Eridanus"; source "$VENV_DIR/bin/activate"; python tool.py)
+                safe_read "tool.py 执行完毕, 按 Enter 返回..."
+                ;;
+            q|Q) break ;;
+            *) warn "无效输入"; sleep 1 ;;
+        esac
+    done
+}
+
+lagrange_menu() {
+    while true; do
+        clear; print_title "管理 Lagrange.OneBot"; hr
+        echo "  1. 启动并进入会话"
+        echo "  2. 启动 (后台)"
+        echo "  3. 停止"
+        echo "  4. 附加 screen 会话"
+        echo "  5. 查看日志"
+        echo "  q. 返回主菜单"
+        safe_read "请选择: "
+        case "$REPLY" in
+            1) start_service_interactive "Lagrange" "$SCREEN_SESSION_LAGRANGE" "$DEPLOY_DIR/Lagrange" "Lagrange.OneBot"; safe_read "按 Enter 返回..." ;;
+            2) start_service_background "screen" "Lagrange" "$SCREEN_SESSION_LAGRANGE" "$DEPLOY_DIR/Lagrange" "Lagrange.OneBot"; safe_read "按 Enter 返回..." ;;
+            3) stop_service "Lagrange"; safe_read "按 Enter 返回..." ;;
+            4) attach_lagrange_session; safe_read "按 Enter 返回..." ;;
+            5) [[ -f "$LAGRANGE_LOG_FILE" ]] && less "$LAGRANGE_LOG_FILE" || warn "日志文件未找到"; safe_read "按 Enter 返回..." ;;
+            q|Q) break ;;
+            *) warn "无效输入"; sleep 1 ;;
+        esac
+    done
+}
+
 main_menu() {
     while true; do
         clear
@@ -162,165 +217,19 @@ main_menu() {
         echo "  2. 停止所有服务"
         hr
         echo "  3. 管理 Eridanus (主程序)"
-        if [[ "$LAGRANGE_DEPLOYED" -eq 1 ]]; then
-            echo "  4. 管理 Lagrange.OneBot (QQ客户端)"
-        fi
+        [[ "$LAGRANGE_DEPLOYED" -eq 1 ]] && echo "  4. 管理 Lagrange.OneBot (QQ客户端)"
         hr
         echo "  q. 退出脚本"
-        read -rp "请输入您的选择: " choice
 
-        case $choice in
-            1) start_all_interactive; read -rp "按 Enter 键返回主菜单..." ;;
-            2) stop_service "Eridanus"; stop_service "Lagrange"; read -rp "按 Enter 键返回..." ;;
+        safe_read "请选择: "
+
+        case "$REPLY" in
+            1) start_all_interactive; safe_read "按 Enter 返回..." ;;
+            2) stop_service "Eridanus"; stop_service "Lagrange"; safe_read "按 Enter 返回..." ;;
             3) eridanus_menu ;;
             4) [[ "$LAGRANGE_DEPLOYED" -eq 1 ]] && lagrange_menu ;;
             q|Q) exit 0 ;;
-            *) warn "无效输入，请重试"; sleep 1 ;;
-        esac
-    done
-}
-
-
-# 添加附加到 tmux 会话的函数
-attach_eridanus_session() {
-    if tmux has-session -t "$TMUX_SESSION_ERIDANUS" 2>/dev/null; then
-        info "即将附加到 Eridanus tmux 会话..."
-        echo "【重要提示】分离会话: 按 Ctrl+b, 然后按 d 键"
-        echo "【重要提示】如需停止程序: 按 Ctrl+c"
-        hr
-        sleep 3
-        clear
-        tmux attach-session -t "$TMUX_SESSION_ERIDANUS"
-        clear
-        ok "已从 Eridanus tmux 会话分离"
-    else
-        warn "Eridanus tmux 会话 '$TMUX_SESSION_ERIDANUS' 不存在或未运行"
-        info "请先启动 Eridanus (后台模式)"
-    fi
-}
-
-# 添加附加到 screen 会话的函数
-attach_lagrange_session() {
-    if screen -list | grep -q "$SCREEN_SESSION_LAGRANGE"; then
-        info "即将附加到 Lagrange.OneBot screen 会话..."
-        echo "【重要提示】分离会话: 按 Ctrl+a, 然后按 d 键"
-        echo "【重要提示】如需停止程序: 按 Ctrl+c"
-        hr
-        sleep 3
-        clear
-        screen -r "$SCREEN_SESSION_LAGRANGE"
-        clear
-        ok "已从 Lagrange.OneBot screen 会话分离"
-    else
-        warn "Lagrange.OneBot screen 会话 '$SCREEN_SESSION_LAGRANGE' 不存在或未运行"
-        info "请先启动 Lagrange.OneBot (后台模式)"
-    fi
-}
-
-# 更新后的 eridanus_menu 函数
-eridanus_menu() {
-    while true; do
-        clear; print_title "管理 Eridanus"; hr
-        echo "  1. 启动 (后台)"
-        echo "  2. 启动 (前台调试)"
-        echo "  3. 停止"
-        echo "  4. 附加到 tmux 会话 (查看运行状态)"
-        echo "  5. 执行 tool.py (更新/工具)"
-        echo "  q. 返回主菜单"
-        
-        read -rp "请选择: " choice
-        case $choice in
-            1) 
-                start_service_background "tmux" "Eridanus" "$TMUX_SESSION_ERIDANUS" "$DEPLOY_DIR/Eridanus" "main.py"
-                read -rp "按 Enter 返回..."
-                ;;
-            2) 
-                info "即将前台启动 Eridanus... 按 Ctrl+C 停止"
-                sleep 2; clear
-                (cd "$DEPLOY_DIR/Eridanus" && "$PYTHON_EXEC" main.py)
-                read -rp "Eridanus 已停止，按 Enter 返回..."
-                ;;
-            3) 
-                stop_service "Eridanus"
-                read -rp "按 Enter 返回..."
-                ;;
-            4) 
-                attach_eridanus_session
-                read -rp "按 Enter 键返回..."
-                ;;
-            5) 
-                info "即将前台执行 tool.py 更新脚本..."
-                sleep 1; clear
-                (
-                    export HOME=/app
-                    mkdir -p /app/.config/pip
-                    mkdir -p /app/.cache/pip
-                    cd "$DEPLOY_DIR/Eridanus" && \
-                    source "$VENV_DIR/bin/activate" && \
-                    python tool.py
-                )
-                read -rp "tool.py 执行完毕，按 Enter 键返回..."
-                ;;
-            q|Q) 
-                break
-                ;;
-            *) 
-                warn "无效输入"
-                sleep 1
-                ;;
-        esac
-    done
-}
-
-
-
-
-
-
-
-lagrange_menu() {
-    while true; do
-        clear; print_title "管理 Lagrange.OneBot"; hr
-        echo "  1. 启动并进入会话 (扫码)"
-        echo "  2. 启动 (仅后台)"
-        echo "  3. 停止"
-        echo "  4. 附加到 screen 会话 (查看运行状态)"  # <-- 新增选项
-        echo "  5. 查看日志文件"                     # <-- 保留文件日志查看
-        echo "  q. 返回主菜单"
-        
-        read -rp "请选择: " choice
-        case $choice in
-            1) 
-                start_service_interactive "Lagrange" "$SCREEN_SESSION_LAGRANGE" "$DEPLOY_DIR/Lagrange" "Lagrange.OneBot"
-                read -rp "按 Enter 键返回..."
-                ;;
-            2) 
-                start_service_background "screen" "Lagrange" "$SCREEN_SESSION_LAGRANGE" "$DEPLOY_DIR/Lagrange" "Lagrange.OneBot"
-                read -rp "按 Enter 返回..."
-                ;;
-            3) 
-                stop_service "Lagrange"
-                read -rp "按 Enter 返回..."
-                ;;
-            4) # <-- 新增附加 screen 会话功能
-                attach_lagrange_session
-                read -rp "按 Enter 键返回..."
-                ;;
-            5) # <-- 保留文件日志查看
-                if [[ -f "$LAGRANGE_LOG_FILE" ]]; then
-                    less "$LAGRANGE_LOG_FILE"
-                else
-                    warn "日志文件未找到: $LAGRANGE_LOG_FILE"
-                    read -rp "按 Enter 返回..."
-                fi
-                ;;
-            q|Q) 
-                break
-                ;;
-            *) 
-                warn "无效输入"
-                sleep 1
-                ;;
+            *) warn "无效输入"; sleep 1 ;;
         esac
     done
 }
@@ -332,14 +241,13 @@ main() {
     export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
     export DOTNET_BUNDLE_EXTRACT_BASE_DIR=/app/temp
     if [[ $EUID -eq 0 ]]; then err "请不要使用 root 用户或 'sudo' 直接运行此脚本"; exit 1; fi
-    if [[ ! -f "$DEPLOY_STATUS_FILE" ]]; then err "部署状态文件 '$DEPLOY_STATUS_FILE' 未找到，请先运行部署脚本"; exit 1; fi
-    if [[ ! -f "$PYTHON_EXEC" ]]; then err "Python 虚拟环境未找到于 '$VENV_DIR'，请重新部署"; exit 1; fi
-    
+    [[ ! -f "$DEPLOY_STATUS_FILE" ]] && { err "部署状态文件未找到"; exit 1; }
+    [[ ! -f "$PYTHON_EXEC" ]] && { err "Python 虚拟环境未找到"; exit 1; }
+
     source "$DEPLOY_STATUS_FILE"
     mkdir -p "$LOG_DIR"
     check_command tmux screen pkill
     main_menu
 }
 
-# 执行主函数
 main
