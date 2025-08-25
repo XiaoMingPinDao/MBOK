@@ -199,7 +199,23 @@ attach_eridanus_session() {
     fi
 }
 
-
+# 添加附加到 screen 会话的函数
+attach_lagrange_session() {
+    if screen -list | grep -q "$SCREEN_SESSION_LAGRANGE"; then
+        info "即将附加到 Lagrange.OneBot screen 会话..."
+        echo "【重要提示】分离会话: 按 Ctrl+a, 然后按 d 键"
+        echo "【重要提示】如需停止程序: 按 Ctrl+c"
+        hr
+        sleep 3
+        clear
+        screen -r "$SCREEN_SESSION_LAGRANGE"
+        clear
+        ok "已从 Lagrange.OneBot screen 会话分离"
+    else
+        warn "Lagrange.OneBot screen 会话 '$SCREEN_SESSION_LAGRANGE' 不存在或未运行"
+        info "请先启动 Lagrange.OneBot (后台模式)"
+    fi
+}
 
 # 更新后的 eridanus_menu 函数
 eridanus_menu() {
@@ -208,9 +224,8 @@ eridanus_menu() {
         echo "  1. 启动 (后台)"
         echo "  2. 启动 (前台调试)"
         echo "  3. 停止"
-        echo "  4. 附加到 tmux 会话 (查看运行状态)"  # <-- 新增选项
+        echo "  4. 附加到 tmux 会话 (查看运行状态)"
         echo "  5. 执行 tool.py (更新/工具)"
-        echo "  6. 查看日志"
         echo "  q. 返回主菜单"
         
         read -rp "请选择: " choice
@@ -229,11 +244,11 @@ eridanus_menu() {
                 stop_service "Eridanus"
                 read -rp "按 Enter 返回..."
                 ;;
-            4) # <-- 新增处理逻辑
+            4) 
                 attach_eridanus_session
                 read -rp "按 Enter 键返回..."
                 ;;
-            5) # <-- 原来的 tool.py 选项
+            5) 
                 info "即将前台执行 tool.py 更新脚本..."
                 sleep 1; clear
                 (
@@ -246,28 +261,6 @@ eridanus_menu() {
                 )
                 read -rp "tool.py 执行完毕，按 Enter 键返回..."
                 ;;
-            6) # <-- 原来的查看日志选项
-                LOG_FILE="$DEPLOY_DIR/Eridanus/log/$(date '+%Y-%m-%d').log"
-                if [[ -f "$LOG_FILE" ]]; then
-                    less "$LOG_FILE"
-                else
-                    warn "日志文件未找到: $LOG_FILE"
-                    # 尝试查找任何日志文件
-                    LOG_FILES=($(find "$DEPLOY_DIR/Eridanus/log" -name "*.log" 2>/dev/null | sort -r))
-                    if [[ ${#LOG_FILES[@]} -gt 0 ]]; then
-                        info "找到以下日志文件:"
-                        for i in "${!LOG_FILES[@]}"; do
-                            echo "  $((i+1)). $(basename "${LOG_FILES[i]}")"
-                        done
-                        read -rp "选择要查看的文件 (1-${#LOG_FILES[@]}): " log_choice
-                        if [[ "$log_choice" =~ ^[0-9]+$ ]] && [[ "$log_choice" -ge 1 ]] && [[ "$log_choice" -le ${#LOG_FILES[@]} ]]; then
-                            less "${LOG_FILES[$((log_choice-1))]}"
-                        fi
-                    else
-                        warn "未找到任何日志文件"
-                    fi
-                fi
-                ;;
             q|Q) 
                 break
                 ;;
@@ -278,18 +271,56 @@ eridanus_menu() {
         esac
     done
 }
+
+
+
+
+
+
+
 lagrange_menu() {
     while true; do
         clear; print_title "管理 Lagrange.OneBot"; hr
-        echo "  1. 启动并进入会话 (扫码)"; echo "  2. 启动 (仅后台)"; echo "  3. 停止"; echo "  4. 查看日志"; echo "  q. 返回主菜单"
+        echo "  1. 启动并进入会话 (扫码)"
+        echo "  2. 启动 (仅后台)"
+        echo "  3. 停止"
+        echo "  4. 附加到 screen 会话 (查看运行状态)"  # <-- 新增选项
+        echo "  5. 查看日志文件"                     # <-- 保留文件日志查看
+        echo "  q. 返回主菜单"
+        
         read -rp "请选择: " choice
         case $choice in
-            1) start_service_interactive "Lagrange" "$SCREEN_SESSION_LAGRANGE" "$DEPLOY_DIR/Lagrange" "Lagrange.OneBot" ;;
-            2) start_service_background "screen" "Lagrange" "$SCREEN_SESSION_LAGRANGE" "$DEPLOY_DIR/Lagrange" "Lagrange.OneBot"; read -rp "按 Enter 返回..." ;;
-            3) stop_service "Lagrange"; read -rp "按 Enter 返回..." ;;
-            4) less "$LAGRANGE_LOG_FILE" ;;
-            q|Q) break ;;
-            *) warn "无效输入" ;;
+            1) 
+                start_service_interactive "Lagrange" "$SCREEN_SESSION_LAGRANGE" "$DEPLOY_DIR/Lagrange" "Lagrange.OneBot"
+                read -rp "按 Enter 键返回..."
+                ;;
+            2) 
+                start_service_background "screen" "Lagrange" "$SCREEN_SESSION_LAGRANGE" "$DEPLOY_DIR/Lagrange" "Lagrange.OneBot"
+                read -rp "按 Enter 返回..."
+                ;;
+            3) 
+                stop_service "Lagrange"
+                read -rp "按 Enter 返回..."
+                ;;
+            4) # <-- 新增附加 screen 会话功能
+                attach_lagrange_session
+                read -rp "按 Enter 键返回..."
+                ;;
+            5) # <-- 保留文件日志查看
+                if [[ -f "$LAGRANGE_LOG_FILE" ]]; then
+                    less "$LAGRANGE_LOG_FILE"
+                else
+                    warn "日志文件未找到: $LAGRANGE_LOG_FILE"
+                    read -rp "按 Enter 返回..."
+                fi
+                ;;
+            q|Q) 
+                break
+                ;;
+            *) 
+                warn "无效输入"
+                sleep 1
+                ;;
         esac
     done
 }
