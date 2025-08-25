@@ -247,6 +247,11 @@ generate_start_script() {
     download_with_retry "https://github.com/zhende1113/Antlia/raw/refs/heads/main/Antlia-docker_build_start.sh" "start.sh"
     chmod +x start.sh
     ok "启动脚本已生成"
+    mkdir -p /app/bot/temp
+    echo "export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1" >> ~/.bashrc
+    echo "export DOTNET_BUNDLE_EXTRACT_BASE_DIR=/app/temp" >> ~/.bashrc
+    echo 'echo "执行 bash /app/start.sh 来启动喵"' >> ~/.bashrc
+
 }
 
 # =============================================================================

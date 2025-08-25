@@ -218,6 +218,8 @@ lagrange_menu() {
 # 脚本入口
 # =============================================================================
 main() {
+    export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
+    export DOTNET_BUNDLE_EXTRACT_BASE_DIR=/app/temp
     if [[ $EUID -eq 0 ]]; then err "请不要使用 root 用户或 'sudo' 直接运行此脚本"; exit 1; fi
     if [[ ! -f "$DEPLOY_STATUS_FILE" ]]; then err "部署状态文件 '$DEPLOY_STATUS_FILE' 未找到，请先运行部署脚本"; exit 1; fi
     if [[ ! -f "$PYTHON_EXEC" ]]; then err "Python 虚拟环境未找到于 '$VENV_DIR'，请重新部署"; exit 1; fi
