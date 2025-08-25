@@ -67,11 +67,14 @@ CONTAINER_DIR="/app/bot"
 case "$1" in
     start)
         echo "[启动] 容器 $CONTAINER_NAME"
-        sudo docker run -dit --name $CONTAINER_NAME             -v "$HOST_DIR":"$CONTAINER_DIR"             $IMAGE
+        sudo docker run -dit --name $CONTAINER_NAME \
+            -v "$HOST_DIR":"$CONTAINER_DIR" \
+            $IMAGE tail -f /dev/null
         ;;
     stop)
         echo "[停止] 容器 $CONTAINER_NAME"
         sudo docker stop $CONTAINER_NAME
+        sudo docker rm $CONTAINER_NAME
         ;;
     exec)
         echo "[进入容器] $CONTAINER_NAME"
@@ -79,10 +82,10 @@ case "$1" in
         ;;
     run)
         echo "[执行] start.sh"
-        sudo docker exec -it $CONTAINER_NAME bash /app/start.sh
+        sudo docker exec -it $CONTAINER_NAME bash /app/bot/start.sh
         ;;
     *)
-        echo "用法: ./Antlia-docker.sh {start|stop|exec|run}"
+        echo "用法: ./manage.sh {start|stop|exec|run}"
         ;;
 esac
 EOF
