@@ -10,6 +10,9 @@ on:
     branches:
       - main
   workflow_dispatch:
+  schedule:
+    # 每天凌晨3点自动构建😋
+    - cron: '0 19 * * *'
 
 jobs:
   build-and-push:
