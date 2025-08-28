@@ -491,6 +491,7 @@ install_python_dependencies() {  #定义函数
 generate_start_script(){ #定义函数
 local start_script_url="${GITHUB_PROXY}https://github.com/zhende1113/Antlia/raw/refs/heads/main/Script/AstrBot/start.sh" #下载链接
          #下载启动脚本
+        cd "$DEPLOY_DIR" || err "无法进入部署目录" #进入部署目录
         download_with_retry "$start_script_url" "astrbot.sh"
 
         info "下载astrbot.sh ing..." #打印信息日志
