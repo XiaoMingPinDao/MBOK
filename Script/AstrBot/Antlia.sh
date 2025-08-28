@@ -295,6 +295,7 @@ install_uv_environment() {                          #定义函数
         fi  #结束条件判断
         
         # 添加到 PATH
+        source $HOME/.local/bin/env  #加载环境变量
         export PATH="$HOME/.cargo/bin:$PATH" #临时添加到当前会话
         echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> ~/.bashrc #永久添加到 bashrc
         
