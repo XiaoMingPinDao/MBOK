@@ -9,11 +9,6 @@ wget -O Antlia-astrbot-install.sh https://github.com/zhende1113/Antlia/raw/refs/
 ```
 
 
-```bash
-# 部署eridanus
-wget -O Antlia-eridanus.sh https://github.com/zhende1113/Antlia/raw/refs/heads/main/Script/Eridanus/other/Antlia.sh && chmod +x Antlia-eridanus.sh && ./Antlia-eridanus.sh
-```
-
 ### 从会话分离
 
 - **tmux**：`Ctrl+b, d`
