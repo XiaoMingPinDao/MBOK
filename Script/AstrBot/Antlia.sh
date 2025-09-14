@@ -319,22 +319,22 @@ install_uv_environment() {
 clone_astrbot() { #定义函数
     print_title "克隆 AstrBot 项目" #打印标题
     
-    #cd "$DEPLOY_DIR" #进入部署目录
+    cd "$DEPLOY_DIR" #进入部署目录
     
      # 如果目录已存在，提示用户选择是否删除
     
-    if [[ -d "AstrBot" ]]; then #如果目录存在
-        warn "检测到 AstrBot 文件夹已存在" #打印警告
-        read -p "是否删除并重新克隆? (y/n, 默认n): " del_choice #读取用户输入
-        if [[ "$del_choice" =~ ^[Yy]$ ]]; then #如果用户选择删除
-            rm -rf "AstrBot" #删除目录
-            ok "已删除旧的 AstrBot 文件夹" #打印信息
-        else #否则
-            warn "跳过 AstrBot 仓库克隆" #打印警告
-            #跳过克隆
-            return
-        fi #结束条件判断
-    fi #结束条件判断
+    #if [[ -d "AstrBot" ]]; then #如果目录存在
+    #    warn "检测到 AstrBot 文件夹已存在" #打印警告
+    #    read -p "是否删除并重新克隆? (y/n, 默认n): " del_choice #读取用户输入
+    #    if [[ "$del_choice" =~ ^[Yy]$ ]]; then #如果用户选择删除
+    #        rm -rf "AstrBot" #删除目录
+    #        ok "已删除旧的 AstrBot 文件夹" #打印信息
+    #    else #否则
+    #       warn "跳过 AstrBot 仓库克隆" #打印警告
+    #        #跳过克隆
+    #        return
+    #    fi #结束条件判断
+    #fi #结束条件判断
     echo "111"
      # 克隆项目
     
