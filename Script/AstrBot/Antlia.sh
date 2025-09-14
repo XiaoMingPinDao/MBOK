@@ -101,6 +101,25 @@ select_github_proxy() {                                               #定义函
 
 #------------------------------------------------------------------------------
 
+# =============================================================================
+# 一次性检查sudo可用性
+# =============================================================================
+check_sudo() {
+    if [[ $EUID -eq 0 ]]; then
+        # 已经是root，不需要sudo
+        SUDO=""
+        ok "当前是 root 用户"
+    elif command_exists sudo; then
+        # 有sudo命令
+        SUDO="sudo"
+        ok "检测到 sudo 命令"
+    else
+        # 没有sudo
+        SUDO=""
+        warn "系统没有 sudo "
+    fi
+}
+
 
 # =============================================================================
 # 包管理器检测
@@ -162,6 +181,7 @@ detect_system() {                               #定义函数
     fi   #结束条件判断
     
     # 检测包管理器
+    check_sudo
     detect_package_manager
 }                           #结束函数定义
 
@@ -177,26 +197,26 @@ install_package() { #定义函数
     info "安装 $package..."                  #打印信息日志
     case $PKG_MANAGER in                   #根据包管理器选择安装命令
         pacman)
-            sudo pacman -S --noconfirm "$package" #安装包
+            $SUDO pacman -S --noconfirm "$package" #安装包
             ;;
         apt)
-            sudo apt update -qq 2>/dev/null || true #更新包列表
-            sudo apt install -y "$package"          #安装包
+            $SUDO apt update -qq 2>/dev/null || true #更新包列表
+            $SUDO apt install -y "$package"          #安装包
             ;;
         dnf)
-            sudo dnf install -y "$package"   #安装包
+            $SUDO dnf install -y "$package"   #安装包
             ;;
         yum)
-            sudo yum install -y "$package"  #安装包
+            $SUDO yum install -y "$package"  #安装包
             ;;
         zypper)
-            sudo zypper install -y "$package" #安装包
+            $SUDO zypper install -y "$package" #安装包
             ;;
         apk)
-            sudo apk add "$package" #安装包
+            $SUDO apk add "$package" #安装包
             ;;
         brew)
-            brew install "$package" #安装包
+            $SUDO install "$package" #安装包
             ;;
         *)
             warn "未知包管理器 $PKG_MANAGER，请手动安装 $package" #打印警告
