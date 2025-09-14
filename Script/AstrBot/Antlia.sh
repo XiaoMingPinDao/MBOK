@@ -16,8 +16,8 @@ GITHUB_PROXY=""                                             # GitHub 代理URL
 PKG_MANAGER=""                                              # 包管理器
 DISTRO=""                                                   # 发行版
 ENV_TYPE=""                                                 # Python 环境类型
-echo "SCRIPT_DIR is: $SCRIPT_DIR"
-echo "DEPLOY_DIR is: $DEPLOY_DIR"
+echo "您当前的目录是: $SCRIPT_DIR"
+echo "DEPLOY_DIR is: $DEPLOY_DIR" 2>/dev/null # 鬼知道这是为什么 
 
 #------------------------------------------------------------------------------
 
@@ -320,27 +320,25 @@ install_uv_environment() {
 # =============================================================================
 clone_astrbot() { #定义函数
     print_title "克隆 AstrBot 项目" #打印标题
-     echo "$DEPLOY_DIR"
+    
+    echo "SCRIPT_DIR is: $SCRIPT_DIR" 2>/dev/null 
+    echo "DEPLOY_DIR is: $DEPLOY_DIR" 2>/dev/null 
     cd "$DEPLOY_DIR" #进入部署目录
-    echo "SCRIPT_DIR is: $SCRIPT_DIR"
-    echo "SCRIPT_DIR is: $SCRIPT_DIR"
-   echo "DEPLOY_DIR is: $DEPLOY_DIR"
-
      # 如果目录已存在，提示用户选择是否删除
     
-    #if [[ -d "AstrBot" ]]; then #如果目录存在
-    #    warn "检测到 AstrBot 文件夹已存在" #打印警告
-    #    read -p "是否删除并重新克隆? (y/n, 默认n): " del_choice #读取用户输入
-    #    if [[ "$del_choice" =~ ^[Yy]$ ]]; then #如果用户选择删除
-    #        rm -rf "AstrBot" #删除目录
-    #        ok "已删除旧的 AstrBot 文件夹" #打印信息
-    #    else #否则
-    #       warn "跳过 AstrBot 仓库克隆" #打印警告
-    #        #跳过克隆
-    #        return
-    #    fi #结束条件判断
-    #fi #结束条件判断
-    echo "111"
+    if [[ -d "AstrBot" ]]; then #如果目录存在
+        warn "检测到 AstrBot 文件夹已存在" #打印警告
+        read -p "是否删除并重新克隆? (y/n, 默认n): " del_choice #读取用户输入
+        if [[ "$del_choice" =~ ^[Yy]$ ]]; then #如果用户选择删除
+            rm -rf "AstrBot" #删除目录
+            ok "已删除旧的 AstrBot 文件夹" #打印信息
+        else #否则
+           warn "跳过 AstrBot 仓库克隆" #打印警告
+            #跳过克隆
+            return
+        fi #结束条件判断
+    fi #结束条件判断
+
      # 克隆项目
     
     local repo_url="${GITHUB_PROXY}https://github.com/AstrBotDevs/AstrBot.git" #设置仓库URL
