@@ -9,8 +9,8 @@ set -o pipefail
 # 路径与常量定义
 # =============================================================================
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"  #获取脚本所在目录
-DEPLOY_DIR="$SCRIPT_DIR"                                    #部署目录
+SCRIPT_DIR="$(pwd)"
+DEPLOY_DIR="$SCRIPT_DIR"                                 #部署目录
 DEPLOY_STATUS_FILE="$SCRIPT_DIR/deploy.status"              #部署状态文件路径
 GITHUB_PROXY=""                                             # GitHub 代理URL
 PKG_MANAGER=""                                              # 包管理器
