@@ -73,6 +73,27 @@ download_with_retry() {                                   #定义函数
 
 #------------------------------------------------------------------------------
 
+check_root_or_sudo() {
+    # 检查当前是否为 root 用户或使用 sudo 运行
+    if [[ "$(id -u)" -eq 0 ]]; then
+        # 如果是 root 用户
+        echo -e "\e[31m警告：您当前以 root 用户身份运行此脚本！\e[0m"
+    elif [[ $EUID -ne 0 && $(sudo -v > /dev/null 2>&1; echo $?) -eq 0 ]]; then
+        # 如果是使用 sudo 运行
+        echo -e "\e[31m警告：您当前以 sudo 权限运行此脚本！\e[0m"
+    else
+        # 用户既不是 root 也没有使用 sudo
+        return 0
+    fi
+
+    # 提示用户确认是否继续
+    read -p "您是否确认以管理员权限运行此脚本？请输入 'yes' 继续： " confirm
+    if [[ "$confirm" != "yes" ]]; then
+        echo "操作已取消。"
+        exit 1
+    fi
+}
+
 
 # =============================================================================
 # GitHub 代理选择
@@ -441,6 +462,8 @@ local start_script_url="${GITHUB_PROXY}https://github.com/zhende1113/Antlia/raw/
 # 主函数
 # =============================================================================
 main() { #定义主函数
+    # 调用检查函数
+    check_root_or_sudo
     print_title "AstrBot Shell部署脚本" #打印标题
     #echo "欢迎使用 AstrBot 简化部署脚本" #打印欢迎信息
     echo "脚本版本: 2025/09/14" #打印版本信息
