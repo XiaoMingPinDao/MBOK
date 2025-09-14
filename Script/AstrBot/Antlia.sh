@@ -16,6 +16,8 @@ GITHUB_PROXY=""                                             # GitHub 代理URL
 PKG_MANAGER=""                                              # 包管理器
 DISTRO=""                                                   # 发行版
 ENV_TYPE=""                                                 # Python 环境类型
+echo "SCRIPT_DIR is: $SCRIPT_DIR"
+echo "DEPLOY_DIR is: $DEPLOY_DIR"
 
 #------------------------------------------------------------------------------
 
