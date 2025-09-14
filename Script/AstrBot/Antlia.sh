@@ -335,7 +335,7 @@ clone_astrbot() { #定义函数
             return
         fi #结束条件判断
     fi #结束条件判断
-    
+    echo "111"
      # 克隆项目
     
     local repo_url="${GITHUB_PROXY}https://github.com/AstrBotDevs/AstrBot.git" #设置仓库URL
