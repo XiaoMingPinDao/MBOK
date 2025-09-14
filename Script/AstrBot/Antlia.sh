@@ -245,35 +245,6 @@ install_system_dependencies() {   #定义函数
     ok "系统依赖安装完成"  #打印成功日志
 }                          #结束函数定义
 
-# =============================================================================
-# Python 环境选择
-# =============================================================================
-select_python_env() {                                #定义函数
-    print_title "选择 Python 环境管理方式"              #打印标题
-    echo "请选择您希望使用的 Python 环境管理方式："        #打印提示
-    echo #打印空行
-    echo "1. uv (推荐，现代化Python包管理器)" #打印选项
-    echo "2. Conda (Miniconda，功能完整)" #打印选项
-    echo "3. venv (Python内置虚拟环境)" #打印选项
-    echo #打印空行
-    
-    read -p "请输入选择 (1-3, 默认1): " env_choice #读取用户输入
-    env_choice=${env_choice:-1}                 #默认选择1
-    
-    case $env_choice in #根据用户输入设置环境类型
-        1) ENV_TYPE="uv"; ok "已选择: uv 环境" ;;  #uv
-        2) ENV_TYPE="conda"; ok "已选择: Conda 环境" ;; #Conda
-        3) ENV_TYPE="venv"; ok "已选择: venv 环境" ;; #venv
-        *)
-            warn "无效输入，使用默认选项" #打印警告
-            ENV_TYPE="uv" #设置默认选项
-            ok "已选择: uv 环境 (默认)" #打印信息
-            ;;
-    esac #结束条件判断
-}                           #结束函数定义
-
-#------------------------------------------------------------------------------
-
 
 # =============================================================================
 # uv 环境安装
@@ -433,8 +404,6 @@ main() { #定义主函数
     select_github_proxy #选择 GitHub 代理
     detect_system #检测系统
     install_system_dependencies #安装系统依赖
-    select_python_env #选择 Python 环境
-    
     # 安装uv
     install_uv_environment
     
