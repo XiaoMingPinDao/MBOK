@@ -3,7 +3,8 @@
 # AstrBot Shell部署脚本
 # 版本: 2025/09/14
 
-set -o pipefail
+set -o 
+#pipefail
 
 # =============================================================================
 # 路径与常量定义
@@ -80,26 +81,47 @@ download_with_retry() {                                   #定义函数
 select_github_proxy() {                                               #定义函数
     print_title "选择 GitHub 代理"                                     #打印标题
     echo "请根据您的网络环境选择一个合适的下载代理："                        #打印提示
-    echo                                                              #打印空行
-    echo "1. ghfast.top 镜像 (推荐)"                                   #打印选项
-    echo "2. ghproxy.net 镜像"                                        #打印选项
-    echo "3. 不使用代理"                                               #打印选项
     echo                                                             #打印空行
-    
-    read -t 30 -p "请输入选择 (1-3, 默认1, 30秒后自动选择): " proxy_choice #读取用户输入
-    proxy_choice=${proxy_choice:-1} #默认选择1
-    
-    case $proxy_choice in # 根据用户输入设置代理
-        1) GITHUB_PROXY="https://ghfast.top/"; ok "已选择: ghfast.top 镜像" ;; # 设置代理 
-        2) GITHUB_PROXY="https://ghproxy.net/"; ok "已选择: ghproxy.net 镜像" ;; # 设置代理
-        3) GITHUB_PROXY=""; ok "已选择: 不使用代理" ;; # 不使用代理
-        *) 
-            warn "无效输入，使用默认代理" # 打印警告
-            GITHUB_PROXY="https://ghfast.top/" # 设置默认代理
-            ok "已选择: ghfast.top 镜像 (默认)" # 打印信息
-            ;;                               # 结束条件判断
-    esac                                              #结束条件判断
-}                                                            #结束函数定义
+
+    # 使用 select 提供选项
+    select proxy_choice in "ghfast.top 镜像 (推荐)" "ghproxy.net 镜像" "不使用代理" "自定义代理"; do
+        case $proxy_choice in
+            "ghfast.top 镜像 (推荐)") 
+                GITHUB_PROXY="https://ghfast.top/"; 
+                ok "已选择: ghfast.top 镜像" 
+                break
+                ;;
+            "ghproxy.net 镜像") 
+                GITHUB_PROXY="https://ghproxy.net/"; 
+                ok "已选择: ghproxy.net 镜像" 
+                break
+                ;;
+            "不使用代理") 
+                GITHUB_PROXY=""; 
+                ok "已选择: 不使用代理" 
+                break
+                ;;
+            "自定义代理") 
+                # 允许用户输入自定义代理
+                read -p "请输入自定义 GitHub 代理 URL (必须以斜杠 / 结尾): " custom_proxy
+                # 检查自定义代理是否以斜杠结尾
+                if [[ -n "$custom_proxy" && "$custom_proxy" != */ ]]; then
+                    custom_proxy="${custom_proxy}/" # 如果没有斜杠，自动添加
+                    warn "自定义代理 URL 没有以斜杠结尾，已自动添加斜杠"
+                fi
+                GITHUB_PROXY="$custom_proxy"
+                ok "已选择: 自定义代理 - $GITHUB_PROXY"
+                break
+                ;;
+            *) 
+                warn "无效输入，使用默认代理"
+                GITHUB_PROXY="https://ghfast.top/"
+                ok "已选择: ghfast.top 镜像 (默认)"
+                break
+                ;;
+        esac
+    done
+} #结束函数定义                                                            #结束函数定义
 
 #------------------------------------------------------------------------------
 
@@ -281,9 +303,9 @@ install_uv_environment() {
         pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple/ 2>/dev/null || true
         # 方法1: pip 安装
         if command_exists pip3; then
-            pip3 install --user uv && export PATH="$HOME/.local/bin:$PATH"
+            pip3 install --user --break-system-packages uv && export PATH="$HOME/.local/bin:$PATH"
         elif command_exists pip; then
-            pip install --user uv && export PATH="$HOME/.local/bin:$PATH"
+            pip install --user --break-system-packages  uv && export PATH="$HOME/.local/bin:$PATH"
         else
             # 方法2: 官方脚本安装 (备选)
             info "pip 不可用，使用官方安装脚本..."
