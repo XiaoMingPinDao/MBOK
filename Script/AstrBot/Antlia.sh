@@ -1,8 +1,7 @@
 #!/bin/bash
 
-# AstrBot 简化部署脚本 - 支持多种Python环境管理
-# 版本: 2025/08/28
-# 支持 Conda、uv、venv 三种环境管理方式
+# AstrBot Shell部署脚本
+# 版本: 2025/09/14
 
 set -o pipefail
 
@@ -11,7 +10,7 @@ set -o pipefail
 # =============================================================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"  #获取脚本所在目录
-DEPLOY_DIR="$SCRIPT_DIR"                                    #部署目录这里偷了一个懒 不想改太多东西
+DEPLOY_DIR="$SCRIPT_DIR"                                    #部署目录
 DEPLOY_STATUS_FILE="$SCRIPT_DIR/deploy.status"              #部署状态文件路径
 GITHUB_PROXY=""                                             # GitHub 代理URL
 PKG_MANAGER=""                                              # 包管理器
@@ -279,125 +278,48 @@ select_python_env() {                                #定义函数
 # =============================================================================
 # uv 环境安装
 # =============================================================================
-install_uv_environment() {                          #定义函数
-    print_title "安装和配置 uv 环境"                    #打印标题
+install_uv_environment() {
+    print_title "安装和配置 uv 环境"
     
-    if command_exists uv; then #如果 uv 已安装
-        ok "uv 已安装" #打印信息
-    else #否则
-        info "安装 uv..." #打印信息日志
-        if command_exists curl; then # 如果 curl 存在
-            curl -LsSf https://astral.sh/uv/install.sh | sh #使用 curl 安装 uv
-        elif command_exists wget; then #如果 wget 存在
-            wget -qO- https://astral.sh/uv/install.sh | sh #使用 wget 安装 uv
-        else #否则
-            err "需要 curl 或 wget 来安装 uv" #打印错误日志并退出
-        fi  #结束条件判断
+    if command_exists uv; then
+        ok "uv 已安装"
+    else
+        info "安装 uv..."
+        pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple/ 2>/dev/null || true
+        # 方法1: pip 安装
+        if command_exists pip3; then
+            pip3 install --user uv && export PATH="$HOME/.local/bin:$PATH"
+        elif command_exists pip; then
+            pip install --user uv && export PATH="$HOME/.local/bin:$PATH"
+        else
+            # 方法2: 官方脚本安装 (备选)
+            info "pip 不可用，使用官方安装脚本..."
+            if command_exists curl; then
+                curl -LsSf https://astral.sh/uv/install.sh | sh
+                export PATH="$HOME/.cargo/bin:$PATH"
+            else
+                err "无法安装 uv，请手动安装 pip 或 curl"
+            fi
+        fi
         
-        # 添加到 PATH
-        source $HOME/.local/bin/env  #加载环境变量
-        export PATH="$HOME/.cargo/bin:$PATH" #临时添加到当前会话
-        echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> ~/.bashrc #永久添加到 bashrc
-        
-        if command_exists uv; then #如果 uv 安装成功
-            ok "uv 安装成功" #打印信息
-        else # 否则
-            err "uv 安装失败" #打印错误日志并退出
-        fi  #结束条件判断
-    fi #结束条件判断
+        # 统一检查安装结果
+        if command_exists uv; then
+            ok "uv 安装成功"
+        else
+            err "uv 安装失败"
+        fi
+    fi
     
-    # 配置 uv 使用国内镜像
-    info "配置 uv 使用清华大学镜像..." #打印信息日志
-    uv pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple/ 2>/dev/null || true #设置镜像
+    # 配置镜像
+    info "配置 uv 使用清华大学镜像..."
+    uv pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple/ 2>/dev/null || true
     
-    ok "uv 环境配置完成" #打印成功日志
-}                      #结束函数定义
+    ok "uv 环境配置完成"
+}
 
 #------------------------------------------------------------------------------
 
 
-# =============================================================================
-# Conda 环境安装
-# =============================================================================
-install_conda_environment() {                         #定义函数
-    print_title "安装和配置 Conda 环境"                   #打印标题
-    
-    if [[ -d "$HOME/miniconda3" ]]; then  #如果 Miniconda 目录存在
-        ok "检测到 Miniconda 已安装" #打印信息
-    else #否则
-        info "下载 Miniconda 安装脚本..." #打印信息日志
-        local arch_suffix="" #定义架构变量
-        case $(uname -m) in #根据系统架构选择下载链接
-            x86_64) arch_suffix="x86_64" ;;  # x86_64
-            aarch64|arm64) arch_suffix="aarch64" ;; # ARM64
-            *) arch_suffix="x86_64"; warn "使用 x86_64 版本，可能不兼容" ;; #默认
-        esac #结束条件判断
-        
-        local miniconda_url="https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-latest-Linux-${arch_suffix}.sh" #下载链接
-         #下载 Miniconda 安装脚本
-        download_with_retry "$miniconda_url" "miniconda.sh"
-
-        info "安装 Miniconda..." #打印信息日志
-        chmod +x miniconda.sh #赋予执行权限
-        bash miniconda.sh -b -u -p "$HOME/miniconda3" || err "Miniconda 安装失败" #静默安装
-        rm -f miniconda.sh #删除安装脚本
-        
-        ok "Miniconda 安装成功" #打印信息
-    fi #结束条件判断
-
-    info "初始化 Conda..." #打印信息日志
-    # 初始化 conda
-    source "$HOME/miniconda3/etc/profile.d/conda.sh" #加载 conda 脚本
-    conda init --all >/dev/null 2>&1 || err "conda init 失败" #初始化 conda
-    
-    # 重新加载 shell 配置
-    [[ -f ~/.bashrc ]] && source ~/.bashrc 2>/dev/null || true #加载 bashrc
-    
-    conda config --set anaconda_tos_accepted yes || conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main || true #接受条款
-    conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r || true #接受条款
-
-    info "配置 Conda 镜像源..." #打印信息日志
-    conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/ >/dev/null 2>&1 || true #添加清华镜像源
-    conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/ >/dev/null 2>&1 || true #添加清华镜像源
-
-    if [[ -d "$HOME/miniconda3/envs/astrbot" ]]; then #如果 astrbot 环境已存在
-        ok "检测到 Conda 环境 'astrbot' 已存在" #打印信息
-    else #否则
-        info "创建 Python 3.11 虚拟环境 (astrbot)..." #打印信息日志
-         #创建 astrbot 环境
-        conda create -n astrbot python=3.11 -y || err "虚拟环境创建失败"
-    fi  #结束条件判断
-    
-    ok "Conda 环境配置完成" #打印成功日志
-}                     #结束函数定义
-
-#------------------------------------------------------------------------------
-
-
-# =============================================================================
-# venv 环境安装
-# =============================================================================
-install_venv_environment() {                     #定义函数
-    print_title "配置 venv 环境"                   #打印标题
-    
-    if [[ -d "$DEPLOY_DIR/.astrbot" ]]; then #如果 venv 目录存在
-        ok "检测到 venv 环境已存在" #打印信息
-    else #否则
-        info "创建 venv 虚拟环境..." #打印信息日志
-        #创建 venv 环境
-        python3 -m venv "$DEPLOY_DIR/.astrbot" || err "venv 环境创建失败"
-    fi #结束条件判断
-    
-    info "激活 venv 环境并升级 pip..." #打印信息日志
-     #激活 venv 并升级 pip
-    source "$DEPLOY_DIR/venv/bin/activate" || err "venv 环境激活失败" #激活 venv
-    pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple/ #设置清华镜像源
-    pip install --upgrade pip >/dev/null 2>&1 || warn "pip 升级失败" #升级 pip
-    
-    ok "venv 环境配置完成" #打印成功日志
-}                    #结束函数定义
-
-#------------------------------------------------------------------------------
 
 
 # =============================================================================
@@ -448,40 +370,19 @@ install_python_dependencies() {  #定义函数
     # 进入项目目录
     
     cd "$DEPLOY_DIR/AstrBot" || err "无法进入 AstrBot 目录" #进入目录
-    
-    case $ENV_TYPE in #根据环境类型安装依赖
-        "uv")
-            info "使用 uv 安装依赖..." #打印信息日志
-            #安装依赖
-            # 确保 uv 在 PATH 中
-            export PATH="$HOME/.cargo/bin:$PATH" #临时添加到当前会话
-                uv sync || err "uv sync 失败" #同步依赖
-            ;;
-        "conda")
-            info "使用 Conda 安装依赖..." #打印信息日志
-             #激活 Conda 并安装依赖
-            source "$HOME/miniconda3/etc/profile.d/conda.sh"
-            conda activate astrbot
-            
-            if [[ -f "requirements.txt" ]]; then #如果 requirements.txt 存在
-                pip install -r requirements.txt || err "依赖安装失败" #安装依赖
-            else #否则
-                warn "未找到 requirements.txt" #打印警告
-            fi #结束条件判断
-            ;;
-        "venv")
-            info "使用 venv 安装依赖..." #打印信息日志
-            #激活 venv 并安装依赖
-            source "$DEPLOY_DIR/venv/bin/activate"
-            
-            if [[ -f "requirements.txt" ]]; then #如果 requirements.txt 存在
-                pip install -r requirements.txt || err "依赖安装失败" #安装依赖
-            else #否则
-                warn "未找到 requirements.txt" #打印警告
-            fi #结束条件判断
-            ;;
-    esac #结束条件判断
-    
+        # 使用 uv 同步依赖
+    if [[ -f "pyproject.toml" ]]; then
+        # 设置环境变量使 uv 使用 pip 镜像配置
+        export UV_INDEX_URL="https://pypi.tuna.tsinghua.edu.cn/simple/"
+        uv sync || err "uv sync 失败" #同步依赖
+    elif [[ -f "requirements.txt" ]]; then
+        # 设置环境变量使 uv 使用 pip 镜像配置
+        export UV_INDEX_URL="https://pypi.tuna.tsinghua.edu.cn/simple/"
+        uv pip install -r requirements.txt || err "uv pip install 失败"
+    else
+        warn "未找到 pyproject.toml 或 requirements.txt 文件"
+    fi
+ 
     ok "Python 依赖安装完成" #打印成功日志
 }                         #结束函数定义
 
@@ -505,17 +406,17 @@ local start_script_url="${GITHUB_PROXY}https://github.com/zhende1113/Antlia/raw/
 # =============================================================================
 # 保存部署状态
 # =============================================================================
-save_deploy_status() {  #定义函数
-    print_title "保存部署状态" #打印标题
-    mkdir -p "$(dirname "$DEPLOY_STATUS_FILE")" #创建目录
-    {
-        echo "ENV_TYPE=$ENV_TYPE"
-        #echo "PKG_MANAGER=$PKG_MANAGER"
-        #echo "GITHUB_PROXY=$GITHUB_PROXY"
-    } > "$DEPLOY_STATUS_FILE" #保存状态到文件
-    #打印信息日志
-    ok "部署状态已保存到 $DEPLOY_STATUS_FILE"
-}                        #结束函数定义
+#save_deploy_status() {  #定义函数
+#    print_title "保存部署状态" #打印标题
+#    mkdir -p "$(dirname "$DEPLOY_STATUS_FILE")" #创建目录
+#    {
+#        echo "ENV_TYPE=$ENV_TYPE"
+#        #echo "PKG_MANAGER=$PKG_MANAGER"
+#        #echo "GITHUB_PROXY=$GITHUB_PROXY"
+#    } > "$DEPLOY_STATUS_FILE" #保存状态到文件
+#    #打印信息日志
+#    ok "部署状态已保存到 $DEPLOY_STATUS_FILE"
+#}                        #结束函数定义
 
 #------------------------------------------------------------------------------
 
@@ -524,9 +425,9 @@ save_deploy_status() {  #定义函数
 # 主函数
 # =============================================================================
 main() { #定义主函数
-    print_title "AstrBot & Antlia" #打印标题
-    echo "欢迎使用 AstrBot 简化部署脚本" #打印欢迎信息
-    echo "脚本版本: 2025/08/28" #打印版本信息
+    print_title "AstrBot Shell部署脚本" #打印标题
+    #echo "欢迎使用 AstrBot 简化部署脚本" #打印欢迎信息
+    echo "脚本版本: 2025/09/14" #打印版本信息
     
     # 执行部署步骤
     select_github_proxy #选择 GitHub 代理
@@ -534,42 +435,26 @@ main() { #定义主函数
     install_system_dependencies #安装系统依赖
     select_python_env #选择 Python 环境
     
-    # 根据选择的环境类型安装
-    case $ENV_TYPE in #根据环境类型安装
-        "uv") install_uv_environment ;; #uv
-        "conda") install_conda_environment ;; #Conda
-        "venv") install_venv_environment ;; #venv
-    esac #结束条件判断
+    # 安装uv
+    install_uv_environment
     
     clone_astrbot #克隆项目
     install_python_dependencies #安装 Python 依赖
     generate_start_script #生成启动脚本
      #保存部署状态 
-    save_deploy_status
+    #save_deploy_status
     
     print_title "🎉 部署完成! 🎉"
-    echo "环境类型: $ENV_TYPE"
     echo "系统信息: $DISTRO ($PKG_MANAGER)"
     echo
     echo "下一步: 运行 './astrbot.sh' 来启动和管理 AstrBot"
-    echo
-    case $ENV_TYPE in
-        "uv")
-            echo "提示: uv 是现代化的 Python 包管理器，启动速度快，依赖管理清晰"
-            ;;
-        "conda")
-            echo "提示: Conda 环境功能完整，适合复杂的科学计算项目"
-            ;;
-        "venv")
-            echo "提示: venv 是 Python 内置的虚拟环境，轻量且兼容性好"
-            ;;
-    esac
+
 }
 
 # 检查是否以 root 用户运行
-if [[ $EUID -eq 0 ]]; then 
-    err "请不要使用 root 用户运行此脚本"
-fi
+#if [[ $EUID -eq 0 ]]; then 
+#    err "请不要使用 root 用户运行此脚本"
+#fi
 
 # 执行主函数
 main
