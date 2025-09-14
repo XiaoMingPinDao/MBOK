@@ -3,6 +3,23 @@
 set -o pipefail #启用管道失败检测
 
 # =============================================================================
+# 环境检查和路径设置
+# =============================================================================
+setup_uv_environment() {
+    # 确保 uv 在 PATH 中
+    export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
+    
+    # 检查 uv 是否可用
+    if ! command -v uv >/dev/null 2>&1; then
+        err "uv 未找到，请检查安装或重新运行部署脚本"
+        return 1
+    fi
+    return 0
+}
+
+# =============================================================================
+
+# =============================================================================
 # 路径与常量定义
 # =============================================================================
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"  #获取脚本所在目录
@@ -45,33 +62,6 @@ check_command() {
     done                                           #结束循环
 }                                                  #结束函数定义
 
-#------------------------------------------------------------------------------
-#激活 Conda 环境 (修复函数名)
-activate_environment_conda() {                      #定义函数
-    if [[ ! -d "$CONDA_DIR" ]]; then                 #检查 Conda 目录是否存在
-        err "Conda 目录 '$CONDA_DIR' 未找到"           #如果不存在打印错误信息
-        return 1                                     #返回错误状态
-    fi                                               #结束条件判断
-                                                     
-    source "$CONDA_DIR/etc/profile.d/conda.sh"       #加载 conda 脚本
-    if ! conda activate astrbot 2>/dev/null; then    #尝试激活环境 (修复环境名)
-        err "无法激活 Conda 环境 'astrbot'"            #如果失败打印错误信息
-        return 1                                     #返回错误状态
-    fi                                               #结束条件判断
-}
-
-#------------------------------------------------------------------------------
-#激活 venv 环境
-activate_environment_venv() {                         #定义函数
-    if [[ ! -d "$DEPLOY_DIR/.astrbot" ]]; then        #检查 venv 目录是否存在
-        err "虚拟环境目录 '$DEPLOY_DIR/.astrbot' 未找到" #如果不存在打印错误信息
-        return 1                                      #返回错误状态
-    fi                                                #结束条件判断
-    
-    source "$DEPLOY_DIR/.astrbot/bin/activate"        #激活 venv 环境
-}                                                     #结束函数定义
-
-#------------------------------------------------------------------------------
 
 # =============================================================================
 # 停止AstrBot
@@ -87,21 +77,9 @@ stop_service() {                                                     #定义函�
 # =============================================================================
 # 后台启动AstrBot
 # =============================================================================
-start_service_background() {       #定义函数                                                                                                  
-
-if [[ "$ENV_TYPE" == "conda" ]]; then     #如果是conda  激活 Conda 环境并运行 AstrBot 主程序                                                                                              
-    tmux new-session -d -s "$TMUX_SESSION_ASTRBOT" \
-            "source '$CONDA_DIR/etc/profile.d/conda.sh' && conda activate astrbot && cd '$DEPLOY_DIR/AstrBot' && python main.py"     
-elif [[ "$ENV_TYPE" == "venv" ]]; then    #如果是 venv  激活 venv 环境并运行 AstrBot 主程序                                                                                             
-    tmux new-session -d -s "$TMUX_SESSION_ASTRBOT" \
-            "source '$DEPLOY_DIR/.astrbot/bin/activate' && cd '$DEPLOY_DIR/AstrBot' && python main.py"
-elif [[ "$ENV_TYPE" == "uv" ]]; then      #如果是 uv  使用 uv 运行 AstrBot 主程序
+start_service_background() {       #定义函数
     tmux new-session -d -s "$TMUX_SESSION_ASTRBOT" \
             "cd '$DEPLOY_DIR/AstrBot' && uv run python main.py"
-else
-    err "你部署的时候有问题 请查看部署状态文件" #打印报错
-    exit 1                                #退出脚本
-fi                                        #结束条件判断
     sleep 1                               #等待 1 秒确保服务启动
     ok "AstrBot 已在后台启动"              #打印成功日志 (修复变量名)
 }
@@ -112,18 +90,7 @@ fi                                        #结束条件判断
 # =============================================================================
 start_astrbot_interactive() {             #定义函数
     cd "$DEPLOY_DIR/AstrBot"              #进入 AstrBot 目录
-if [[ "$ENV_TYPE" == "conda" ]]; then     #根据环境类型选择启动方式
-    activate_environment_conda            #激活 Conda 环境 
-    python "$DEPLOY_DIR/AstrBot/main.py"  #运行 AstrBot 主程序
-elif [[ "$ENV_TYPE" == "venv" ]]; then    #如果是 venv 环境
-    activate_environment_venv             #激活 venv 环境
-    python "$DEPLOY_DIR/AstrBot/main.py"  #运行 AstrBot 主程序
-elif [[ "$ENV_TYPE" == "uv" ]]; then      #如果是 uv 环境
-    uv run python "$DEPLOY_DIR/AstrBot/main.py"  #使用 uv 运行 AstrBot 主程序 (修复路径)
-else                                      #如果都不是
-    err "你部署的时候有问题 请查看部署状态文件" #打印报错
-    exit 1                                #退出脚本
-fi                                        #结束条件判断
+    uv run python "$DEPLOY_DIR/AstrBot/main.py"  #使用 uv 运行 AstrBot 主程序
 }                                         #结束函数定义
 #------------------------------------------------------------------------------
 
@@ -192,21 +159,7 @@ main_menu() {
 # 脚本入口
 # =============================================================================
 main() {
-    # 检查是否以 root 用户运行
-    if [[ $EUID -eq 0 ]]; then
-        err "请不要使用 root 用户或 'sudo' 直接运行此脚本"
-        exit 1
-    fi
-    
-    # 检查部署状态文件
-    if [[ ! -f "$DEPLOY_STATUS_FILE" ]]; then
-        err "部署状态文件 '$DEPLOY_STATUS_FILE' 未找到"
-        exit 1
-    fi
-    
-    # 加载部署状态
-    source "$DEPLOY_STATUS_FILE"
-    
+    setup_uv_environment
     # 检查必需命令
     if ! check_command tmux; then
         exit 1
