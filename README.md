@@ -6,7 +6,10 @@
 ```bash
 bash <(curl -sSL https://github.com/zhende1113/Antlia/raw/refs/heads/main/Script/AstrBot/Antlia.sh)
 ```
-
+fish语法与bash zsh不同
+```fish
+bash (curl -sSL https://github.com/zhende1113/Antlia/raw/refs/heads/main/Script/AstrBot/Antlia.sh)
+```
 
 ### 从会话分离
 
