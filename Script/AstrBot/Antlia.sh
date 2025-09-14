@@ -323,6 +323,8 @@ clone_astrbot() { #定义函数
      echo "$DEPLOY_DIR"
     cd "$DEPLOY_DIR" #进入部署目录
     echo "SCRIPT_DIR is: $SCRIPT_DIR"
+    echo "SCRIPT_DIR is: $SCRIPT_DIR"
+   echo "DEPLOY_DIR is: $DEPLOY_DIR"
 
      # 如果目录已存在，提示用户选择是否删除
     
