@@ -318,9 +318,9 @@ install_uv_environment() {
 # =============================================================================
 clone_astrbot() { #定义函数
     print_title "克隆 AstrBot 项目" #打印标题
-    
+     echo "$DEPLOY_DIR"
     cd "$DEPLOY_DIR" #进入部署目录
-    
+   
      # 如果目录已存在，提示用户选择是否删除
     
     #if [[ -d "AstrBot" ]]; then #如果目录存在
