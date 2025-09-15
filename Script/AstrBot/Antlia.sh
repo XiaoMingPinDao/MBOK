@@ -51,14 +51,14 @@ print_title() { echo -e "${BOLD}${CYAN}=== $1 ===${RESET}"; }
 
 astrbot_art() {
     echo -e "${CYAN}"
-    echo "               _        ____        _   "
-    echo "     /\       | |      |  _ \      | |  "
-    echo "    /  \   ___| |_ _ __| |_) | ___ | |_ "
-    echo "   / /\ \ / __| __| '__|  _ < / _ \| __|"
-    echo "  / ____ \\__ \ |_| |  | |_) | (_) | |_ "
-    echo " /_/    \_\___/\__|_|  |____/ \___/ \__|"
+    echo "     _        _        ____        _   "
+    echo "    / \   ___| |_ _ __| __ )  ___ | |_ "
+    echo "   / _ \ / __| __| '__|  _ \ / _ \| __|"
+    echo "  / ___ \\__ \ |_| |  | |_) | (_) | |_ "
+    echo " /_/   \_\___/\__|_|  |____/ \___/ \__|"
     echo -e "${RESET}"
 }
+
 
 #------------------------------------------------------------------------------
 
@@ -306,7 +306,7 @@ install_package() { #定义函数
 install_system_dependencies() {   #定义函数
     print_title "安装系统依赖"  #打印标题
     
-    local packages=("git" "python3" "tmux" "tar" "findutils")  #定义必需包数组
+    local packages=("git" "python3" "tmux" "tar" "findutils" "gzip")  #定义必需包数组
     
     # 检查下载工具
     if ! command_exists curl && ! command_exists wget; then  #如果 curl 和 wget 都不存在
