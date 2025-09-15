@@ -350,17 +350,16 @@ install_uv_environment() {
     else
         info "安装 uv..."
         pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple/ 2>/dev/null || true
-        pip install --upgrade pip
         # 方法1: pip 安装
         if command_exists pip3; then
-            if pip3 install --upgrade pip && pip3 install --user --break-system-packages uv; then
+            if python3 -m pip install --upgrade pip && pip3 install --user --break-system-packages uv; then
                 export PATH="$HOME/.local/bin:$PATH"
                 ok "uv 安装成功"
             else
                 err "pip3 安装失败，尝试使用官方脚本安装..."
             fi
         elif command_exists pip; then
-            if pip install --upgrade pip && pip install --user --break-system-packages uv; then
+            if python -m pip install --upgrade pip && pip install --user --break-system-packages uv; then
                 export PATH="$HOME/.local/bin:$PATH"
                 ok "uv 安装成功"
             else
