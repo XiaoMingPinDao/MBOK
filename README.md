@@ -30,4 +30,4 @@ bash (curl -sSL https://github.com/zhende1113/Antlia/raw/refs/heads/main/Script/
 
 ### 关于
 
-安装有问题就去提交议题就行了 部署或者 启动问题 带上 **Linux发行版** 和 **日志**
+有问题就去提交议题就行了 **部署**或者**启动**问题 带上 **Linux发行版** 和 **日志**
