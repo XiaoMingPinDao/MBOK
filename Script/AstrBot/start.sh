@@ -33,13 +33,36 @@ CURRENT_USER=$(whoami)                                      #当前用户
 # 日志函数
 # =============================================================================
 
-info() { echo "[INFO] $1"; }                                      #信息日志
-ok() { echo "[OK] $1"; }                                          #成功日志
-warn() { echo "[WARN] $1"; }                                      #警告日志
-err() { echo "[ERROR] $1" >&2; }                                  #错误日志
-print_title() { echo -e "\n=== $1 ==="; }                         #打印标题
-print_warning() { echo "[WARNING] $1"; }                          #警告信息函数
-hr() { echo "================================================"; } #分割线
+# 定义颜色
+RESET='\033[0m'     # 重置颜色
+BOLD='\033[1m'      # 加粗
+RED='\033[31m'      # 红色
+GREEN='\033[32m'    # 绿色
+YELLOW='\033[33m'   # 黄色
+BLUE='\033[34m'     # 蓝色
+CYAN='\033[36m'     # 青色
+MAGENTA='\033[35m'  # 紫色
+
+# 信息日志
+info() { echo -e "${BLUE}[INFO]${RESET} $1"; }
+
+# 成功日志
+ok() { echo -e "${GREEN}[OK]${RESET} $1"; }
+
+# 警告日志
+warn() { echo -e "${YELLOW}[WARN]${RESET} $1"; }
+
+# 错误日志
+err() { echo -e "${RED}[ERROR]${RESET} $1" >&2; }
+
+# 打印标题
+print_title() { echo -e "${BOLD}${CYAN}\n=== $1 ===${RESET}"; }
+
+# 警告信息函数
+print_warning() { echo -e "${MAGENTA}[WARNING]${RESET} $1"; }
+
+# 分割线
+hr() { echo -e "${CYAN}================================================${RESET}"; }
 
 #------------------------------------------------------------------------------
 
@@ -100,18 +123,19 @@ start_astrbot_interactive() {             #定义函数
 main_menu() {
     while true; do
         clear
-        echo "================================================"
-        echo "       Astrbot & Antlia 管理面板"
-        echo "    用户: $CURRENT_USER | 时间: $(date '+%Y-%m-%d %H:%M:%S')"
-        echo "================================================"
-        echo "主菜单:"
-        echo "  1. 启动Astrbot (后台运行)"
-        echo "  2. 启动Astrbot (前台运行)"
-        echo "  3. 附加Astrbot会话"
+        print_title "AstrBot 管理面板"
+        echo -e "${CYAN}用户: ${GREEN}$CURRENT_USER${RESET} | ${CYAN}时间: ${GREEN}$(date '+%Y-%m-%d %H:%M:%S')${RESET}"
         hr
-        echo "  4. 停止所有服务"
+
+        echo -e "${BOLD}主菜单:${RESET}"
+        echo -e "  ${GREEN}1.${RESET} 启动 AstrBot (后台运行)"
+        echo -e "  ${GREEN}2.${RESET} 启动 AstrBot (前台运行)"
+        echo -e "  ${GREEN}3.${RESET} 附加到 AstrBot 会话"
         hr
-        echo "  q. 退出脚本"
+        echo -e "  ${RED}4.${RESET} 停止所有服务"
+        hr
+        echo -e "  ${MAGENTA}q.${RESET} 退出脚本"
+        
         read -rp "请输入您的选择: " choice
 
         case $choice in
@@ -120,6 +144,7 @@ main_menu() {
                     stop_service
                 fi
                 start_service_background
+                echo -e "${GREEN}AstrBot 已启动 (后台运行)${RESET}"
                 read -rp "按 Enter 键返回..."
                 ;;
             2) 
@@ -128,21 +153,24 @@ main_menu() {
                     stop_service
                 fi
                 start_astrbot_interactive
+                echo -e "${GREEN}AstrBot 已启动 (前台运行)${RESET}"
                 read -rp "按 Enter 键返回..."
                 ;;
             3) 
                 if tmux_session_exists "$TMUX_SESSION_ASTRBOT"; then
                     tmux attach -t "$TMUX_SESSION_ASTRBOT"
                 else
-                    print_warning "AstrBot 会话不存在"  #修复会话名称
+                    print_warning "AstrBot 会话不存在，无法附加"
                 fi
                 read -rp "按 Enter 键返回..."
                 ;;
             4) 
                 stop_service
+                echo -e "${RED}所有服务已停止${RESET}"
                 read -rp "按 Enter 键返回..."
                 ;;
             q|0) 
+                echo -e "${CYAN}退出脚本...${RESET}"
                 exit 0
                 ;;
             *) 
