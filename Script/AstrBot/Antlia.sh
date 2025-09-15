@@ -3,7 +3,7 @@
 # AstrBot Shell部署脚本
 # 版本: 2025/09/14
 
-#set -o pipefail
+set -o pipefail
 
 # =============================================================================
 # 路径与常量定义
@@ -102,17 +102,17 @@ download_with_retry() {                                   #定义函数
 # 检测并创建 /run/tmux/ 目录
 check_tmux_directory() {
     local tmux_dir="/run/tmux"
-    
+    info "开始检查 tmux 文件与权限"
     # 检查目录是否存在
     if [ ! -d "$tmux_dir" ]; then
         info "目录 $tmux_dir 不存在，正在创建..."
-        sudo mkdir -p "$tmux_dir" 
+        $SUDO mkdir -p "$tmux_dir" 
     fi
     
     # 检查目录权限
     if [ "$(stat -c '%a' "$tmux_dir")" -ne 1777 ]; then
         info "目录权限不正确，正在修复权限..."
-        sudo chmod 1777 "$tmux_dir" 
+        $SUDO chmod 1777 "$tmux_dir" 
     fi
     
     echo "[OK] $tmux_dir 目录检查通过"
