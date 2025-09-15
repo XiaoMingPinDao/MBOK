@@ -286,7 +286,7 @@ install_package() { #定义函数
             $SUDO zypper install -y "$package" #安装包
             ;;
         apk)
-            $SUDO apk add "$package" #安装包
+            $SUDO apk add gcc musl-dev linux-headers "$package" #安装包
             ;;
         brew)
             $SUDO install "$package" #安装包
