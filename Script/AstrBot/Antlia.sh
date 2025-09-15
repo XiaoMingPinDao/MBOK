@@ -306,7 +306,7 @@ install_package() { #定义函数
 install_system_dependencies() {   #定义函数
     print_title "安装系统依赖"  #打印标题
     
-    local packages=("git" "python3" "tmux")  #定义必需包数组
+    local packages=("git" "python3" "tmux" "tar" )  #定义必需包数组
     
     # 检查下载工具
     if ! command_exists curl && ! command_exists wget; then  #如果 curl 和 wget 都不存在
@@ -349,42 +349,83 @@ install_uv_environment() {
         ok "uv 已安装"
     else
         info "安装 uv..."
-        pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple/ 2>/dev/null || true
-        # 方法1: pip 安装
-        if command_exists pip3; then
-            if python3 -m pip install --upgrade pip && pip3 install --user --break-system-packages uv; then
-                export PATH="$HOME/.local/bin:$PATH"
-                ok "uv 安装成功"
+        
+        # 方法1: GitHub 预编译包安装 (优先)
+        info "从 GitHub 下载预编译 uv 包..."
+        
+        # 检测架构
+        local arch
+        case "$(uname -m)" in
+            x86_64) arch="x86_64" ;;
+            aarch64) arch="aarch64" ;;
+            arm64) arch="aarch64" ;;
+            *) err "不支持的架构: $(uname -m)" ;;
+        esac
+        
+        # 检测操作系统
+        local os
+        case "$(uname -s)" in
+            Linux) os="unknown-linux-gnu" ;;
+            Darwin) os="apple-darwin" ;;
+            *) err "不支持的操作系统: $(uname -s)" ;;
+        esac
+        
+        local uv_filename="uv-${target}"
+        local uv_url="${GITHUB_PROXY}https://github.com/astral-sh/uv/releases/latest/download/${uv_filename}.tar.gz"
+        local temp_dir="/tmp/uv_install_$$"
+        
+        # 创建临时目录
+        mkdir -p "$temp_dir" || err "无法创建临时目录"
+        cd "$temp_dir" || err "无法进入临时目录"
+        
+        # 下载并解压
+        if download_with_retry "$uv_url" "uv.tar.gz"; then
+            info "解压 uv 安装包..."
+            if tar -xzf "uv.tar.gz"; then
+                # 创建用户本地bin目录
+                mkdir -p "$HOME/.local/bin"
+                
+                # 复制可执行文件
+                if cp "${uv_filename}/uv" "$HOME/.local/bin/uv"; then
+                    chmod +x "$HOME/.local/bin/uv"
+                    export PATH="$HOME/.local/bin:$PATH"
+                    
+                    # 验证安装
+                    if "$HOME/.local/bin/uv" --version >/dev/null 2>&1; then
+                        ok "uv 从 GitHub 安装成功"
+                        cd "$DEPLOY_DIR" && rm -rf "$temp_dir"
+                    else
+                        warn "uv 安装后验证失败，尝试备用方法..."
+                    fi
+                else
+                    warn "复制 uv 可执行文件失败，尝试备用方法..."
+                fi
             else
-                err "pip3 安装失败，尝试使用官方脚本安装..."
-            fi
-        elif command_exists pip; then
-            if python -m pip install --upgrade pip && pip install --user --break-system-packages uv; then
-                export PATH="$HOME/.local/bin:$PATH"
-                ok "uv 安装成功"
-            else
-                err "pip 安装失败，尝试使用官方脚本安装..."
+                warn "解压失败，尝试备用方法..."
             fi
         else
-            err "没有找到 pip3 或 pip，无法安装 uv，使用官方安装脚本..."
+            warn "下载失败，尝试备用方法..."
         fi
+        
+        # 清理临时目录
+        cd "$DEPLOY_DIR" 2>/dev/null || true
+        rm -rf "$temp_dir" 2>/dev/null || true
         
         # 方法2: 官方脚本安装 (备选)
         if ! command_exists uv; then
-            info "pip 安装失败，使用官方安装脚本..."
+            info "GitHub 包安装失败，使用官方安装脚本..."
             if command_exists curl; then
                 curl -LsSf https://astral.sh/uv/install.sh | sh
                 export PATH="$HOME/.cargo/bin:$PATH"
                 if command_exists uv; then
-                    ok "uv 安装成功"
+                    ok "uv 通过官方脚本安装成功"
                 else
                     err "官方安装脚本也失败，请手动安装 uv"
                 fi
             else
-                err "无法安装 uv，请手动安装 pip 或 curl"
+                err "无法安装 uv，请手动安装 curl 或从 https://github.com/astral-sh/uv/releases 下载"
             fi
         fi
-        
     fi
     
     # 配置镜像
