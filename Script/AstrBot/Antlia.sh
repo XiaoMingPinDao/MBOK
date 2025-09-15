@@ -350,7 +350,7 @@ install_uv_environment() {
     else
         info "安装 uv..."
         pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple/ 2>/dev/null || true
-        
+        pip install --upgrade pip
         # 方法1: pip 安装
         if command_exists pip3; then
             if pip3 install --user --break-system-packages uv; then
