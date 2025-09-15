@@ -455,18 +455,46 @@ install_python_dependencies() {  # 定义函数
     if [[ -f "pyproject.toml" ]]; then
         # 设置环境变量使 uv 使用 pip 镜像配置
         export UV_INDEX_URL="https://pypi.tuna.tsinghua.edu.cn/simple/"
-        
-        # 使用 uv 同步依赖
-        if ! uv sync --index-url https://pypi.tuna.tsinghua.edu.cn/simple/; then
-            err "uv sync 失败"  # 同步依赖失败
+
+        # 使用 uv sync 安装依赖
+        attempt=1
+        while [[ $attempt -le 3 ]]; do
+            if uv sync --index-url https://pypi.tuna.tsinghua.edu.cn/simple/; then
+                ok "uv sync 成功"
+                break
+            else
+                warn "uv sync 失败，重试 $attempt/3"
+                ((attempt++))
+                sleep 5
+            fi
+        done
+
+        # 如果 uv sync 仍然失败，改用 pip
+        if [[ $attempt -gt 3 ]]; then
+            warn "uv sync 失败，尝试使用 pip 安装"
+            uv pip install -r requirements.txt || err "pip 安装失败"
         fi
     elif [[ -f "requirements.txt" ]]; then
         # 设置环境变量使 uv 使用 pip 镜像配置
         export UV_INDEX_URL="https://pypi.tuna.tsinghua.edu.cn/simple/"
-        
-        # 使用 uv 安装依赖
-        if ! uv pip install -r requirements.txt; then
-            err "uv pip install 失败"
+
+        # 使用 uv pip 安装依赖
+        attempt=1
+        while [[ $attempt -le 3 ]]; do
+            if uv pip install -r requirements.txt; then
+                ok "uv pip 安装成功"
+                break
+            else
+                warn "uv pip 安装失败，重试 $attempt/3"
+                ((attempt++))
+                sleep 5
+            fi
+        done
+
+        # 如果 uv pip 仍然失败，改用 pip
+        if [[ $attempt -gt 3 ]]; then
+            warn "uv pip 安装失败，尝试使用 pip 安装"
+            pip install -r requirements.txt || err "pip 安装失败"
         fi
     else
         warn "未找到 pyproject.toml 或 requirements.txt 文件"
@@ -474,6 +502,7 @@ install_python_dependencies() {  # 定义函数
 
     ok "Python 依赖安装完成" # 打印成功日志
 }  # 结束函数定义
+
 
 
 #------------------------------------------------------------------------------
