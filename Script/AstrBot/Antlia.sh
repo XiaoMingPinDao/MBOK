@@ -106,20 +106,18 @@ check_tmux_directory() {
     # 检查目录是否存在
     if [ ! -d "$tmux_dir" ]; then
         info "目录 $tmux_dir 不存在，正在创建..."
-        sudo mkdir -p "$tmux_dir" || { echo "[ERROR] 创建目录 $tmux_dir 失败！"; return 1; }
+        sudo mkdir -p "$tmux_dir" 
     fi
     
     # 检查目录权限
     if [ "$(stat -c '%a' "$tmux_dir")" -ne 1777 ]; then
         info "目录权限不正确，正在修复权限..."
-        sudo chmod 1777 "$tmux_dir" || { echo "[ERROR] 修改权限失败！"; return 1; }
+        sudo chmod 1777 "$tmux_dir" 
     fi
     
     echo "[OK] $tmux_dir 目录检查通过"
 }
 
-# 调用函数检查并创建 tmux 目录
-check_tmux_directory
 
 
 #------------------------------------------------------------------------------
