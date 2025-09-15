@@ -400,7 +400,7 @@ install_uv_environment() {
                 # 列出解压后的文件，确保 uv 文件存在
                 ls -l
                 
-                # 检查解压后的文件是否存在
+                # 检查解压后的文件是否存在，并遍历目录查找 uv
                 if [ -f "uv" ]; then
                     # 创建用户本地bin目录
                     mkdir -p "$HOME/.local/bin"
@@ -421,7 +421,30 @@ install_uv_environment() {
                         warn "复制 uv 可执行文件失败，尝试备用方法..."
                     fi
                 else
-                    err "解压包中找不到 uv 可执行文件"
+                    # 遍历解压后的文件夹，查找 uv 可执行文件
+                    uv_file=$(find . -type f -name "uv")
+                    if [ -n "$uv_file" ]; then
+                        # 创建用户本地bin目录
+                        mkdir -p "$HOME/.local/bin"
+                        
+                        # 复制找到的 uv 可执行文件
+                        if cp "$uv_file" "$HOME/.local/bin/uv"; then
+                            chmod +x "$HOME/.local/bin/uv"
+                            export PATH="$HOME/.local/bin:$PATH"
+                            
+                            # 验证安装
+                            if "$HOME/.local/bin/uv" --version >/dev/null 2>&1; then
+                                ok "uv 从 GitHub 安装成功"
+                                cd "$DEPLOY_DIR" && rm -rf "$temp_dir"
+                            else
+                                warn "uv 安装后验证失败，尝试备用方法..."
+                            fi
+                        else
+                            err "复制 uv 可执行文件失败"
+                        fi
+                    else
+                        err "解压包中找不到 uv 可执行文件"
+                    fi
                 fi
             else
                 warn "解压失败，尝试备用方法..."
