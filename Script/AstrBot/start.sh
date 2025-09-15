@@ -156,7 +156,7 @@ main_menu() {
                     stop_service
                 fi
                 start_service_background
-                echo -e "${GREEN}AstrBot 已启动 (后台运行)${RESET}"
+                echo -e "${GREEN}AstrBot 已启动 ${RESET}"
                 read -rp "按 Enter 键返回..."
                 ;;
             2) 
@@ -165,7 +165,7 @@ main_menu() {
                     stop_service
                 fi
                 start_astrbot_interactive
-                echo -e "${GREEN}AstrBot 已启动 (前台运行)${RESET}"
+                echo -e "${GREEN}AstrBot 已停止 ${RESET}"
                 read -rp "按 Enter 键返回..."
                 ;;
             3) 
