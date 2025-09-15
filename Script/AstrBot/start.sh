@@ -64,6 +64,18 @@ print_warning() { echo -e "${MAGENTA}[WARNING]${RESET} $1"; }
 # 分割线
 hr() { echo -e "${CYAN}================================================${RESET}"; }
 
+# 使用自定义的蓝色艺术字
+astrbot_art() {
+    echo -e "${CYAN}"
+    echo "               _        ____        _   "
+    echo "     /\       | |      |  _ \      | |  "
+    echo "    /  \   ___| |_ _ __| |_) | ___ | |_ "
+    echo "   / /\ \ / __| __| '__|  _ < / _ \| __|"
+    echo "  / ____ \\__ \ |_| |  | |_) | (_) | |_ "
+    echo " /_/    \_\___/\__|_|  |____/ \___/ \__|"
+    echo -e "${RESET}"
+}
+
 #------------------------------------------------------------------------------
 
 # =============================================================================
@@ -126,7 +138,7 @@ main_menu() {
         print_title "AstrBot 管理面板"
         echo -e "${CYAN}用户: ${GREEN}$CURRENT_USER${RESET} | ${CYAN}时间: ${GREEN}$(date '+%Y-%m-%d %H:%M:%S')${RESET}"
         hr
-
+        astrbot_art
         echo -e "${BOLD}主菜单:${RESET}"
         echo -e "  ${GREEN}1.${RESET} 启动 AstrBot (后台运行)"
         echo -e "  ${GREEN}2.${RESET} 启动 AstrBot (前台运行)"
