@@ -3,8 +3,7 @@
 # AstrBot Shell部署脚本
 # 版本: 2025/09/14
 
-set -o 
-#pipefail
+set -o pipefail
 
 # =============================================================================
 # 路径与常量定义
@@ -17,7 +16,7 @@ GITHUB_PROXY=""                                             # GitHub 代理URL
 PKG_MANAGER=""                                              # 包管理器
 DISTRO=""                                                   # 发行版
 ENV_TYPE=""                                                 # Python 环境类型
-echo "您当前的目录是: $SCRIPT_DIR"
+echo "您当前的目录是: $SCRIPT_DIR" 2>/dev/null
 echo "DEPLOY_DIR is: $DEPLOY_DIR" 2>/dev/null # 鬼知道这是为什么 
 
 #------------------------------------------------------------------------------
@@ -322,28 +321,42 @@ install_uv_environment() {
     else
         info "安装 uv..."
         pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple/ 2>/dev/null || true
+        
         # 方法1: pip 安装
         if command_exists pip3; then
-            pip3 install --user --break-system-packages uv && export PATH="$HOME/.local/bin:$PATH"
+            if pip3 install --user --break-system-packages uv; then
+                export PATH="$HOME/.local/bin:$PATH"
+                ok "uv 安装成功"
+            else
+                err "pip3 安装失败，尝试使用官方脚本安装..."
+            fi
         elif command_exists pip; then
-            pip install --user --break-system-packages  uv && export PATH="$HOME/.local/bin:$PATH"
+            if pip install --user --break-system-packages uv; then
+                export PATH="$HOME/.local/bin:$PATH"
+                ok "uv 安装成功"
+            else
+                err "pip 安装失败，尝试使用官方脚本安装..."
+            fi
         else
-            # 方法2: 官方脚本安装 (备选)
-            info "pip 不可用，使用官方安装脚本..."
+            err "没有找到 pip3 或 pip，无法安装 uv，使用官方安装脚本..."
+        fi
+        
+        # 方法2: 官方脚本安装 (备选)
+        if ! command_exists uv; then
+            info "pip 安装失败，使用官方安装脚本..."
             if command_exists curl; then
                 curl -LsSf https://astral.sh/uv/install.sh | sh
                 export PATH="$HOME/.cargo/bin:$PATH"
+                if command_exists uv; then
+                    ok "uv 安装成功"
+                else
+                    err "官方安装脚本也失败，请手动安装 uv"
+                fi
             else
                 err "无法安装 uv，请手动安装 pip 或 curl"
             fi
         fi
         
-        # 统一检查安装结果
-        if command_exists uv; then
-            ok "uv 安装成功"
-        else
-            err "uv 安装失败"
-        fi
     fi
     
     # 配置镜像
@@ -352,6 +365,7 @@ install_uv_environment() {
     
     ok "uv 环境配置完成"
 }
+
 
 #------------------------------------------------------------------------------
 
@@ -411,7 +425,8 @@ install_python_dependencies() {  #定义函数
     if [[ -f "pyproject.toml" ]]; then
         # 设置环境变量使 uv 使用 pip 镜像配置
         export UV_INDEX_URL="https://pypi.tuna.tsinghua.edu.cn/simple/"
-        uv sync || err "uv sync 失败" #同步依赖
+        uv sync --index-url https://pypi.tuna.tsinghua.edu.cn/simple/
+ || err "uv sync 失败" #同步依赖
     elif [[ -f "requirements.txt" ]]; then
         # 设置环境变量使 uv 使用 pip 镜像配置
         export UV_INDEX_URL="https://pypi.tuna.tsinghua.edu.cn/simple/"
