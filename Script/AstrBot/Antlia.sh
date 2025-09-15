@@ -206,7 +206,7 @@ detect_package_manager() {                          #定义函数
         "dnf:Fedora/RHEL/CentOS"
         "yum:RHEL/CentOS (老版本)"
         "zypper:openSUSE"
-        "apk:Alpine Linux"
+        #"apk:Alpine Linux"
         "brew:macOS/Linux (Homebrew)"
     ) #结束数组定义
     
@@ -353,14 +353,14 @@ install_uv_environment() {
         pip install --upgrade pip
         # 方法1: pip 安装
         if command_exists pip3; then
-            if pip3 install --user --break-system-packages uv; then
+            if pip3 install --upgrade pip && pip3 install --user --break-system-packages uv; then
                 export PATH="$HOME/.local/bin:$PATH"
                 ok "uv 安装成功"
             else
                 err "pip3 安装失败，尝试使用官方脚本安装..."
             fi
         elif command_exists pip; then
-            if pip install --user --break-system-packages uv; then
+            if pip install --upgrade pip && pip install --user --break-system-packages uv; then
                 export PATH="$HOME/.local/bin:$PATH"
                 ok "uv 安装成功"
             else
