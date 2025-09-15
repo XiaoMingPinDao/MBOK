@@ -415,12 +415,18 @@ install_uv_environment() {
         if ! command_exists uv; then
             info "GitHub 包安装失败，使用官方安装脚本..."
             if command_exists curl; then
-                curl -LsSf https://astral.sh/uv/install.sh | sh
-                export PATH="$HOME/.cargo/bin:$PATH"
-                if command_exists uv; then
-                    ok "uv 通过官方脚本安装成功"
+                if curl -LsSf https://astral.sh/uv/install.sh | sh; then
+                    export PATH="$HOME/.local/bin:$PATH"
+                    # 检查多个可能的安装位置
+                    if command_exists uv || [[ -x "$HOME/.local/bin/uv" ]] || [[ -x "$HOME/.cargo/bin/uv" ]]; then
+                        ok "uv 通过官方脚本安装成功"
+                        # 确保PATH包含正确的目录
+                        export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
+                    else
+                        err "官方安装脚本安装后找不到 uv 可执行文件"
+                    fi
                 else
-                    err "官方安装脚本也失败，请手动安装 uv"
+                    err "官方安装脚本执行失败"
                 fi
             else
                 err "无法安装 uv，请手动安装 curl 或从 https://github.com/astral-sh/uv/releases 下载"
@@ -434,7 +440,6 @@ install_uv_environment() {
     
     ok "uv 环境配置完成"
 }
-
 
 
 #------------------------------------------------------------------------------
