@@ -397,23 +397,31 @@ install_uv_environment() {
         if download_with_retry "$uv_url" "uv.tar.gz"; then
             info "解压 uv 安装包..."
             if tar -xzf "uv.tar.gz"; then
-                # 创建用户本地bin目录
-                mkdir -p "$HOME/.local/bin"
+                # 列出解压后的文件，确保 uv 文件存在
+                ls -l
                 
-                # 复制可执行文件
-                if cp "uv" "$HOME/.local/bin/uv"; then
-                    chmod +x "$HOME/.local/bin/uv"
-                    export PATH="$HOME/.local/bin:$PATH"
+                # 检查解压后的文件是否存在
+                if [ -f "uv" ]; then
+                    # 创建用户本地bin目录
+                    mkdir -p "$HOME/.local/bin"
                     
-                    # 验证安装
-                    if "$HOME/.local/bin/uv" --version >/dev/null 2>&1; then
-                        ok "uv 从 GitHub 安装成功"
-                        cd "$DEPLOY_DIR" && rm -rf "$temp_dir"
+                    # 复制可执行文件
+                    if cp "uv" "$HOME/.local/bin/uv"; then
+                        chmod +x "$HOME/.local/bin/uv"
+                        export PATH="$HOME/.local/bin:$PATH"
+                        
+                        # 验证安装
+                        if "$HOME/.local/bin/uv" --version >/dev/null 2>&1; then
+                            ok "uv 从 GitHub 安装成功"
+                            cd "$DEPLOY_DIR" && rm -rf "$temp_dir"
+                        else
+                            warn "uv 安装后验证失败，尝试备用方法..."
+                        fi
                     else
-                        warn "uv 安装后验证失败，尝试备用方法..."
+                        warn "复制 uv 可执行文件失败，尝试备用方法..."
                     fi
                 else
-                    warn "复制 uv 可执行文件失败，尝试备用方法..."
+                    err "解压包中找不到 uv 可执行文件"
                 fi
             else
                 warn "解压失败，尝试备用方法..."
@@ -454,7 +462,7 @@ install_uv_environment() {
     uv pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple/ 2>/dev/null || true
     
     ok "uv 环境配置完成"
-
+    
     # 将 uv 安装路径添加到 ~/.bashrc, ~/.zshrc, ~/.config/fish/config.fish
     info "将 uv 安装路径添加到配置文件..."
     
@@ -492,6 +500,7 @@ install_uv_environment() {
         exec fish -c 'source $HOME/.config/fish/config.fish'  # 使用 exec 刷新 fish 配置
     fi
 }
+
 
 #------------------------------------------------------------------------------
 
