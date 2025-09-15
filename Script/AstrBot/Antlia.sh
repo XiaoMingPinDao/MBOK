@@ -358,20 +358,35 @@ install_uv_environment() {
         case "$(uname -m)" in
             x86_64) arch="x86_64" ;;
             aarch64) arch="aarch64" ;;
-            arm64) arch="aarch64" ;;
+            arm64) arch="aarch64" ;;  # ARM64 作为 aarch64 处理
+            armv7) arch="armv7" ;;
             *) err "不支持的架构: $(uname -m)" ;;
         esac
         
-        # 检测操作系统
+        # 检测操作系统及C库类型
         local os
+        local libc
         case "$(uname -s)" in
-            Linux) os="unknown-linux-gnu" ;;
-            Darwin) os="apple-darwin" ;;
+            Linux)
+                os="unknown-linux-gnu"
+                # 检测是否为musl环境 (比如 Alpine)
+                if [ -f "/lib/ld-musl-x86_64.so.1" ]; then
+                    libc="musl"
+                    os="unknown-linux-musl"
+                else
+                    libc="glibc"
+                fi
+                ;;
+            Darwin) 
+                os="apple-darwin"
+                libc="glibc"  # macOS 使用 glibc
+                ;;
             *) err "不支持的操作系统: $(uname -s)" ;;
         esac
         
-        local uv_filename="uv-${target}"
-        local uv_url="${GITHUB_PROXY}https://github.com/astral-sh/uv/releases/latest/download/${uv_filename}.tar.gz"
+        # 根据操作系统和架构选择下载链接
+        local uv_filename="uv-${arch}-${os}.tar.gz"
+        local uv_url="${GITHUB_PROXY}https://github.com/astral-sh/uv/releases/latest/download/${uv_filename}"
         local temp_dir="/tmp/uv_install_$$"
         
         # 创建临时目录
@@ -386,7 +401,7 @@ install_uv_environment() {
                 mkdir -p "$HOME/.local/bin"
                 
                 # 复制可执行文件
-                if cp "${uv_filename}/uv" "$HOME/.local/bin/uv"; then
+                if cp "uv" "$HOME/.local/bin/uv"; then
                     chmod +x "$HOME/.local/bin/uv"
                     export PATH="$HOME/.local/bin:$PATH"
                     
@@ -439,8 +454,44 @@ install_uv_environment() {
     uv pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple/ 2>/dev/null || true
     
     ok "uv 环境配置完成"
-}
 
+    # 将 uv 安装路径添加到 ~/.bashrc, ~/.zshrc, ~/.config/fish/config.fish
+    info "将 uv 安装路径添加到配置文件..."
+    
+    # 检查是否安装了 Bash，并修改 ~/.bashrc
+    if command_exists bash; then
+        echo "export PATH=\"$HOME/.local/bin:\$PATH\"" >> "$HOME/.bashrc"
+    else
+        warn "未找到 Bash，跳过修改 ~/.bashrc"
+    fi
+    
+    # 检查是否安装了 Zsh，并修改 ~/.zshrc
+    if command_exists zsh; then
+        echo "export PATH=\"$HOME/.local/bin:\$PATH\"" >> "$HOME/.zshrc"
+    else
+        warn "未找到 Zsh，跳过修改 ~/.zshrc"
+    fi
+    
+    # 检查是否安装了 Fish，并修改 ~/.config/fish/config.fish
+    if command_exists fish; then
+        echo "set -gx PATH \"$HOME/.local/bin\" \$PATH" >> "$HOME/.config/fish/config.fish"
+    else
+        warn "未找到 Fish，跳过修改 ~/.config/fish/config.fish"
+    fi
+    
+    # 重新加载 ~/.bashrc, ~/.zshrc, ~/.config/fish/config.fish 使修改生效
+    if command_exists bash; then
+        source "$HOME/.bashrc"
+    fi
+    
+    if command_exists zsh; then
+        source "$HOME/.zshrc"
+    fi
+    
+    if command_exists fish; then
+        exec fish -c 'source $HOME/.config/fish/config.fish'  # 使用 exec 刷新 fish 配置
+    fi
+}
 
 #------------------------------------------------------------------------------
 
