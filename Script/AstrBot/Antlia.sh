@@ -99,6 +99,29 @@ download_with_retry() {                                   #定义函数
     err "所有下载尝试都失败了"                                   #打印错误日志并退出
 }                                                             #结束函数定义
 
+# 检测并创建 /run/tmux/ 目录
+check_tmux_directory() {
+    local tmux_dir="/run/tmux"
+    
+    # 检查目录是否存在
+    if [ ! -d "$tmux_dir" ]; then
+        info "目录 $tmux_dir 不存在，正在创建..."
+        sudo mkdir -p "$tmux_dir" || { echo "[ERROR] 创建目录 $tmux_dir 失败！"; return 1; }
+    fi
+    
+    # 检查目录权限
+    if [ "$(stat -c '%a' "$tmux_dir")" -ne 1777 ]; then
+        info "目录权限不正确，正在修复权限..."
+        sudo chmod 1777 "$tmux_dir" || { echo "[ERROR] 修改权限失败！"; return 1; }
+    fi
+    
+    echo "[OK] $tmux_dir 目录检查通过"
+}
+
+# 调用函数检查并创建 tmux 目录
+check_tmux_directory
+
+
 #------------------------------------------------------------------------------
 
 check_root_or_sudo() {
@@ -631,24 +654,6 @@ local start_script_url="${GITHUB_PROXY}https://github.com/zhende1113/Antlia/raw/
 
 
 # =============================================================================
-# 保存部署状态
-# =============================================================================
-#save_deploy_status() {  #定义函数
-#    print_title "保存部署状态" #打印标题
-#    mkdir -p "$(dirname "$DEPLOY_STATUS_FILE")" #创建目录
-#    {
-#        echo "ENV_TYPE=$ENV_TYPE"
-#        #echo "PKG_MANAGER=$PKG_MANAGER"
-#        #echo "GITHUB_PROXY=$GITHUB_PROXY"
-#    } > "$DEPLOY_STATUS_FILE" #保存状态到文件
-#    #打印信息日志
-#    ok "部署状态已保存到 $DEPLOY_STATUS_FILE"
-#}                        #结束函数定义
-
-#------------------------------------------------------------------------------
-
-
-# =============================================================================
 # 主函数
 # =============================================================================
 main() { #定义主函数
@@ -657,7 +662,7 @@ main() { #定义主函数
     astrbot_art
     print_title "AstrBot Shell部署脚本" #打印标题
     #echo "欢迎使用 AstrBot 简化部署脚本" #打印欢迎信息
-    echo "脚本版本: 2025/09/14" #打印版本信息
+    info "脚本版本: 2025/09/15" #打印版本信息
     
     # 执行部署步骤
     select_github_proxy #选择 GitHub 代理
@@ -669,8 +674,7 @@ main() { #定义主函数
     clone_astrbot #克隆项目
     install_python_dependencies #安装 Python 依赖
     generate_start_script #生成启动脚本
-     #保存部署状态 
-    #save_deploy_status
+    check_tmux_directory #检查tmux目录防止 在启动的时候 couldn't create directory /run/tmux/0 (No such file or directory)
     
     print_title "🎉 部署完成! 🎉"
     echo "系统信息: $DISTRO ($PKG_MANAGER)"
