@@ -49,6 +49,16 @@ err() { echo -e "${RED}[ERROR]${RESET} $1"; exit 1; }
 # 打印标题
 print_title() { echo -e "${BOLD}${CYAN}=== $1 ===${RESET}"; }
 
+astrbot_art() {
+    echo -e "${CYAN}"
+    echo "               _        ____        _   "
+    echo "     /\       | |      |  _ \      | |  "
+    echo "    /  \   ___| |_ _ __| |_) | ___ | |_ "
+    echo "   / /\ \ / __| __| '__|  _ < / _ \| __|"
+    echo "  / ____ \\__ \ |_| |  | |_) | (_) | |_ "
+    echo " /_/    \_\___/\__|_|  |____/ \___/ \__|"
+    echo -e "${RESET}"
+}
 
 #------------------------------------------------------------------------------
 
@@ -498,6 +508,7 @@ local start_script_url="${GITHUB_PROXY}https://github.com/zhende1113/Antlia/raw/
 main() { #定义主函数
     # 调用检查函数
     check_root_or_sudo
+    astrbot_art
     print_title "AstrBot Shell部署脚本" #打印标题
     #echo "欢迎使用 AstrBot 简化部署脚本" #打印欢迎信息
     echo "脚本版本: 2025/09/14" #打印版本信息
