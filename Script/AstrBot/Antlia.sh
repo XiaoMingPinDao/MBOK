@@ -445,28 +445,36 @@ clone_astrbot() { #定义函数
 # =============================================================================
 # Python 依赖安装
 # =============================================================================
-install_python_dependencies() {  #定义函数
-    print_title "安装 Python 依赖" #打印标题
+install_python_dependencies() {  # 定义函数
+    print_title "安装 Python 依赖" # 打印标题
     
     # 进入项目目录
-    
-    cd "$DEPLOY_DIR/AstrBot" || err "无法进入 AstrBot 目录" #进入目录
-        # 使用 uv 同步依赖
+    cd "$DEPLOY_DIR/AstrBot" || err "无法进入 AstrBot 目录" # 进入目录
+
+    # 使用 uv 同步依赖
     if [[ -f "pyproject.toml" ]]; then
         # 设置环境变量使 uv 使用 pip 镜像配置
         export UV_INDEX_URL="https://pypi.tuna.tsinghua.edu.cn/simple/"
-        uv sync --index-url https://pypi.tuna.tsinghua.edu.cn/simple/
- || err "uv sync 失败" #同步依赖
+        
+        # 使用 uv 同步依赖
+        if ! uv sync --index-url https://pypi.tuna.tsinghua.edu.cn/simple/; then
+            err "uv sync 失败"  # 同步依赖失败
+        fi
     elif [[ -f "requirements.txt" ]]; then
         # 设置环境变量使 uv 使用 pip 镜像配置
         export UV_INDEX_URL="https://pypi.tuna.tsinghua.edu.cn/simple/"
-        uv pip install -r requirements.txt || err "uv pip install 失败"
+        
+        # 使用 uv 安装依赖
+        if ! uv pip install -r requirements.txt; then
+            err "uv pip install 失败"
+        fi
     else
         warn "未找到 pyproject.toml 或 requirements.txt 文件"
     fi
- 
-    ok "Python 依赖安装完成" #打印成功日志
-}                         #结束函数定义
+
+    ok "Python 依赖安装完成" # 打印成功日志
+}  # 结束函数定义
+
 
 #------------------------------------------------------------------------------
 
