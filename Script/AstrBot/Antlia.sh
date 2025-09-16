@@ -363,6 +363,7 @@ install_system_dependencies() {   #定义函数
 # =============================================================================
 # uv 环境安装
 # =============================================================================
+
 install_uv_environment() {
     print_title "安装和配置 uv 环境"
     
@@ -391,7 +392,7 @@ install_uv_environment() {
             Linux)
                 os="unknown-linux-gnu"
                 # 检测是否为musl环境 (比如 Alpine)
-                if [ -f "/lib/ld-musl-x86_64.so.1" ]; then
+                if [ -f "/lib/ld-musl-x86_64.so.1" ] || [ -f "/lib/ld-musl-aarch64.so.1" ]; then
                     libc="musl"
                     os="unknown-linux-musl"
                 else
@@ -419,21 +420,36 @@ install_uv_environment() {
             info "解压 uv 安装包..."
             if tar -xzf "uv.tar.gz"; then
                 # 列出解压后的文件，确保 uv 文件存在
-                ls -l
+                ls -la
                 
-                # 自动获取解压后的目录
+                # 修复：更灵活地查找uv目录，支持各种架构和系统
                 local uv_dir
-                uv_dir=$(ls -d */ | grep -E '^uv-.*-unknown-linux-gnu$' | head -n 1)
-
+                # 首先尝试查找包含uv的目录
+                uv_dir=$(find . -maxdepth 1 -type d -name "uv-*" | head -n 1)
+                
+                # 如果没找到，尝试其他可能的模式
                 if [[ -z "$uv_dir" ]]; then
+                    uv_dir=$(ls -d */ 2>/dev/null | grep -E '^uv-' | head -n 1)
+                fi
+                
+                # 如果还是没找到，列出所有目录供调试
+                if [[ -z "$uv_dir" ]]; then
+                    warn "未找到预期的uv目录，当前目录内容："
+                    ls -la
                     err "无法找到解压后的 uv 目录"
                 fi
+                
+                # 去掉可能的尾部斜杠
+                uv_dir="${uv_dir%/}"
+                info "找到 uv 目录: $uv_dir"
                 
                 # 进入解压后的文件夹
                 cd "$uv_dir" || err "进入解压目录失败"
                 
                 # 查找 uv 可执行文件
                 if [ -f "uv" ]; then
+                    info "找到 uv 可执行文件，开始安装..."
+                    
                     # 创建用户本地bin目录
                     mkdir -p "$HOME/.local/bin"
                     
@@ -445,6 +461,10 @@ install_uv_environment() {
                         # 验证安装
                         if "$HOME/.local/bin/uv" --version >/dev/null 2>&1; then
                             ok "uv 从 GitHub 安装成功"
+                            # 显示版本信息
+                            local uv_version
+                            uv_version=$("$HOME/.local/bin/uv" --version 2>/dev/null | head -n 1)
+                            info "安装的 uv 版本: $uv_version"
                             cd "$DEPLOY_DIR" && rm -rf "$temp_dir"
                         else
                             warn "uv 安装后验证失败，尝试备用方法..."
@@ -453,6 +473,9 @@ install_uv_environment() {
                         warn "复制 uv 可执行文件失败，尝试备用方法..."
                     fi
                 else
+                    # 列出当前目录内容供调试
+                    warn "在目录 $uv_dir 中找不到 uv 可执行文件，目录内容："
+                    ls -la
                     err "解压包中找不到 uv 可执行文件"
                 fi
             else
@@ -477,6 +500,10 @@ install_uv_environment() {
                         ok "uv 通过官方脚本安装成功"
                         # 确保PATH包含正确的目录
                         export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
+                        # 显示版本信息
+                        local uv_version
+                        uv_version=$(uv --version 2>/dev/null | head -n 1)
+                        info "安装的 uv 版本: $uv_version"
                     else
                         err "官方安装脚本安装后找不到 uv 可执行文件"
                     fi
@@ -495,42 +522,49 @@ install_uv_environment() {
     
     ok "uv 环境配置完成"
     
-    # 将 uv 安装路径添加到 ~/.bashrc, ~/.zshrc, ~/.config/fish/config.fish
+    # 将 uv 安装路径添加到配置文件
     info "将 uv 安装路径添加到配置文件..."
     
+    # 定义要添加的PATH设置
+    local path_export='export PATH="$HOME/.local/bin:$PATH"'
+    local fish_path_set='set -gx PATH "$HOME/.local/bin" $PATH'
+    
     # 检查是否安装了 Bash，并修改 ~/.bashrc
-    if command_exists bash; then
-        echo "export PATH=\"$HOME/.local/bin:\$PATH\"" >> "$HOME/.bashrc"
-    else
-        warn "未找到 Bash，跳过修改 ~/.bashrc"
+    if command_exists bash && [ -f "$HOME/.bashrc" ]; then
+        # 检查是否已经存在相同的PATH设置，避免重复添加
+        if ! grep -q 'export PATH="$HOME/.local/bin:$PATH"' "$HOME/.bashrc"; then
+            echo "$path_export" >> "$HOME/.bashrc"
+            info "已添加 uv 路径到 ~/.bashrc"
+        fi
     fi
     
     # 检查是否安装了 Zsh，并修改 ~/.zshrc
-    if command_exists zsh; then
-        echo "export PATH=\"$HOME/.local/bin:\$PATH\"" >> "$HOME/.zshrc"
-    else
-        warn "未找到 Zsh，跳过修改 ~/.zshrc"
+    if command_exists zsh && [ -f "$HOME/.zshrc" ]; then
+        if ! grep -q 'export PATH="$HOME/.local/bin:$PATH"' "$HOME/.zshrc"; then
+            echo "$path_export" >> "$HOME/.zshrc"
+            info "已添加 uv 路径到 ~/.zshrc"
+        fi
     fi
     
     # 检查是否安装了 Fish，并修改 ~/.config/fish/config.fish
     if command_exists fish; then
-        echo "set -gx PATH \"$HOME/.local/bin\" \$PATH" >> "$HOME/.config/fish/config.fish"
-    else
-        warn "未找到 Fish，跳过修改 ~/.config/fish/config.fish"
+        local fish_config="$HOME/.config/fish/config.fish"
+        mkdir -p "$(dirname "$fish_config")"
+        if [ -f "$fish_config" ]; then
+            if ! grep -q 'set -gx PATH "$HOME/.local/bin"' "$fish_config"; then
+                echo "$fish_path_set" >> "$fish_config"
+                info "已添加 uv 路径到 ~/.config/fish/config.fish"
+            fi
+        else
+            echo "$fish_path_set" > "$fish_config"
+            info "已创建 ~/.config/fish/config.fish 并添加 uv 路径"
+        fi
     fi
     
-    # 重新加载 ~/.bashrc, ~/.zshrc, ~/.config/fish/config.fish 使修改生效
-    if command_exists bash; then
-        source "$HOME/.bashrc"
-    fi
-    
-    if command_exists zsh; then
-        source "$HOME/.zshrc"
-    fi
-    
-    if command_exists fish; then
-        exec fish -c 'source $HOME/.config/fish/config.fish'  # 使用 exec 刷新 fish 配置
-    fi
+    # 提示用户重新加载配置或重新登录
+    info "请运行以下命令重新加载配置，或重新登录终端："
+    info "  source ~/.bashrc    # 对于 Bash 用户"
+    info "  source ~/.zshrc     # 对于 Zsh 用户"
 }
 
 
