@@ -621,12 +621,12 @@ install_python_dependencies() {  # 定义函数
     # 使用 uv 同步依赖
     if [[ -f "pyproject.toml" ]]; then
         # 设置环境变量使 uv 使用 pip 镜像配置
-        export UV_INDEX_URL="https://pypi.tuna.tsinghua.edu.cn/simple/"
+        export UV_INDEX_URL="http://mirrors.aliyun.com/pypi/simple/"
 
         # 使用 uv sync 安装依赖
         attempt=1
         while [[ $attempt -le 3 ]]; do
-            if uv sync --index-url https://pypi.tuna.tsinghua.edu.cn/simple/; then
+            if uv sync --index-url http://mirrors.aliyun.com/pypi/simple; then
                 ok "uv sync 成功"
                 break
             else
