@@ -363,6 +363,9 @@ install_system_dependencies() {   #定义函数
 # =============================================================================
 # uv 环境安装
 # =============================================================================
+        
+
+#------------------------------------------------------------------------------
 install_uv_environment() {
     print_title "安装和配置 uv 环境"
     
@@ -421,8 +424,16 @@ install_uv_environment() {
                 # 列出解压后的文件，确保 uv 文件存在
                 ls -l
                 
+                # 自动获取解压后的目录
+                local uv_dir
+                uv_dir=$(ls -d */ | grep -E '^uv-.*-unknown-linux-gnu$' | head -n 1)
+
+                if [[ -z "$uv_dir" ]]; then
+                    err "无法找到解压后的 uv 目录"
+                fi
+                
                 # 进入解压后的文件夹
-                cd uv-x86_64-unknown-linux-gnu || err "进入解压目录失败"
+                cd "$uv_dir" || err "进入解压目录失败"
                 
                 # 查找 uv 可执行文件
                 if [ -f "uv" ]; then
@@ -524,10 +535,6 @@ install_uv_environment() {
         exec fish -c 'source $HOME/.config/fish/config.fish'  # 使用 exec 刷新 fish 配置
     fi
 }
-
-
-#------------------------------------------------------------------------------
-
 
 
 
