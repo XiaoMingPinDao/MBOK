@@ -67,22 +67,27 @@ get_latest_version() {
     local version
 
     info "获取 uv 最新版本信息..."
+
     if command_exists curl; then
-        version=$(curl -s "$api_url" | grep '"tag_name"' | sed -E 's/.*"tag_name": "([^"]+)".*/\1/')
+        version=$(curl -s "$api_url" | grep '"tag_name"' | sed -E 's/.*"tag_name": "([^"]+)".*/\1/' | tr -d '\r\n')
     elif command_exists wget; then
-        version=$(wget -qO- "$api_url" | grep '"tag_name"' | sed -E 's/.*"tag_name": "([^"]+)".*/\1/')
+        version=$(wget -qO- "$api_url" | grep '"tag_name"' | sed -E 's/.*"tag_name": "([^"]+)".*/\1/' | tr -d '\r\n')
     else
         warn "无法获取最新版本，使用默认版本 0.8.18"
         version="0.8.18"
     fi
 
+    # 验证版本格式
     if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
         warn "获取的版本格式异常: $version，使用默认版本 0.8.18"
         version="0.8.18"
     fi
+
     info "获取到的最新版本: $version"
     echo "$version"
+    
 }
+
 
 detect_system() {
     local arch os
@@ -126,6 +131,8 @@ build_download_url() {
     local target="$2"
     local filename="uv-${target}.tar.gz"
     echo "${GITHUB_PROXY}https://github.com/astral-sh/uv/releases/download/${version}/${filename}"
+    info "构建下载 URL: $url"
+
 }
 
 install_uv_binary() {
