@@ -380,7 +380,7 @@ install_uv_environment() {
         info "安装 uv..."
         bash <(curl -sSL "${GITHUB_PROXY}https://github.com/Astriora/Antlia/raw/refs/heads/main/Script/UV/uv_install.sh") --GITHUB-URL "$GITHUB_PROXY"
 
-
+}
 # =============================================================================
 # 项目克隆
 # =============================================================================
