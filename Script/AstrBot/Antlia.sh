@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # AstrBot Shell部署脚本
-# 版本: 2025/09/14
+# 版本: 2025/09/18
 
 set -o pipefail
 
@@ -291,7 +291,7 @@ install_package() { #定义函数
     info "安装 $package..."                  #打印信息日志
     case $PKG_MANAGER in                   #根据包管理器选择安装命令
         pacman)
-            $SUDO pacman -S --noconfirm "$package" #安装包
+            $SUDO pacman -Sy --noconfirm "$package" #安装包
             ;;
         apt)
             $SUDO apt update -qq 2>/dev/null || true #更新包列表
@@ -430,15 +430,13 @@ install_python_dependencies() {  # 定义函数
     # 进入项目目录
     cd "$DEPLOY_DIR/AstrBot" || err "无法进入 AstrBot 目录" # 进入目录
 
-    # 使用 uv 同步依赖
-    if [[ -f "pyproject.toml" ]]; then
         # 设置环境变量使 uv 使用 pip 镜像配置
-        export UV_INDEX_URL="http://mirrors.aliyun.com/pypi/simple/"
+        export UV_INDEX_URL="https://mirrors.ustc.edu.cn/pypi/simple"
 
         # 使用 uv sync 安装依赖
         attempt=1
         while [[ $attempt -le 3 ]]; do
-            if uv sync --index-url http://mirrors.aliyun.com/pypi/simple; then
+            if uv sync --index-url https://mirrors.ustc.edu.cn/pypi/simple/; then
                 ok "uv sync 成功"
                 break
             else
@@ -450,35 +448,10 @@ install_python_dependencies() {  # 定义函数
 
         # 如果 uv sync 仍然失败，改用 pip
         if [[ $attempt -gt 3 ]]; then
-            warn "uv sync 失败，尝试使用 pip 安装"
-            uv pip install -r requirements.txt || err "pip 安装失败"
+            err "uv sync 失败 脚本将停止"
+            exit 0
+
         fi
-    elif [[ -f "requirements.txt" ]]; then
-        # 设置环境变量使 uv 使用 pip 镜像配置
-        export UV_INDEX_URL="https://pypi.tuna.tsinghua.edu.cn/simple/"
-
-        # 使用 uv pip 安装依赖
-        attempt=1
-        while [[ $attempt -le 3 ]]; do
-            if uv pip install -r requirements.txt; then
-                ok "uv pip 安装成功"
-                break
-            else
-                warn "uv pip 安装失败，重试 $attempt/3"
-                ((attempt++))
-                sleep 5
-            fi
-        done
-
-        # 如果 uv pip 仍然失败，改用 pip
-        if [[ $attempt -gt 3 ]]; then
-            warn "uv pip 安装失败，尝试使用 pip 安装"
-            pip install -r requirements.txt || err "pip 安装失败"
-        fi
-    else
-        warn "未找到 pyproject.toml 或 requirements.txt 文件"
-    fi
-
     ok "Python 依赖安装完成" # 打印成功日志
 }  # 结束函数定义
 
@@ -509,8 +482,8 @@ main() { #定义主函数
     check_root_or_sudo
     astrbot_art
     print_title "AstrBot Shell部署脚本" #打印标题
-    #echo "欢迎使用 AstrBot 简化部署脚本" #打印欢迎信息
-    info "脚本版本: 2025/09/15" #打印版本信息
+
+    info "脚本版本: 2025/09/18" #打印版本信息
     
     # 执行部署步骤
     select_github_proxy #选择 GitHub 代理
@@ -538,3 +511,4 @@ main() { #定义主函数
 
 # 执行主函数
 main
+
