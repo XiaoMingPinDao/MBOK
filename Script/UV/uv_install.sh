@@ -62,33 +62,10 @@ parse_github_url() {
     done
 }
 
-get_latest_version() {
-    local api_url="${GITHUB_PROXY}https://api.github.com/repos/astral-sh/uv/releases/latest"
-    local version
-
-    info "获取 uv 最新版本信息..."
-
-    if command_exists curl; then
-        version=$(curl -s "$api_url" | grep '"tag_name"' | sed -E 's/.*"tag_name": "([^"]+)".*/\1/' | tr -d '\r\n')
-    elif command_exists wget; then
-        version=$(wget -qO- "$api_url" | grep '"tag_name"' | sed -E 's/.*"tag_name": "([^"]+)".*/\1/' | tr -d '\r\n')
-    else
-        warn "无法获取最新版本，使用默认版本 0.8.18"
-        version="0.8.18"
-    fi
-
-    # 验证版本格式
-    if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-        warn "获取的版本格式异常: $version，使用默认版本 0.8.18"
-        version="0.8.18"
-    fi
-
-    info "获取到的最新版本: $version"
-    echo "$version"
-    
-}
 
 
+
+# 检测系统架构和操作系统
 detect_system() {
     local arch os
     case "$(uname -m)" in
@@ -101,39 +78,27 @@ detect_system() {
         powerpc64le) arch="powerpc64le" ;;
         riscv64) arch="riscv64gc" ;;
         s390x) arch="s390x" ;;
-        *) err "不支持的架构: $(uname -m)"; return 1 ;;
+        *) err "不支持的架构: $(uname -m)" ;;
     esac
 
     case "$(uname -s)" in
         Linux)
-            if [ -f "/lib/ld-musl-x86_64.so.1" ] || [ -f "/lib/ld-musl-aarch64.so.1" ] || command -v musl-gcc >/dev/null 2>&1; then
-                case "$arch" in
-                    armv7|arm) os="unknown-linux-musleabihf" ;;
-                    *) os="unknown-linux-musl" ;;
-                esac
+            if [ -f "/lib/ld-musl-x86_64.so.1" ] || [ -f "/lib/ld-musl-aarch64.so.1" ]; then
+                os="unknown-linux-musl"
+            elif [[ "$arch" == "armv7" ]]; then
+                os="unknown-linux-gnueabihf"
             else
-                case "$arch" in
-                    armv7) os="unknown-linux-gnueabihf" ;;
-                    arm) os="unknown-linux-gnueabihf" ;;
-                    *) os="unknown-linux-gnu" ;;
-                esac
+                os="unknown-linux-gnu"
             fi
             ;;
         Darwin) os="apple-darwin" ;;
-        *) err "不支持的操作系统: $(uname -s)"; return 1 ;;
+        *) err "不支持的操作系统: $(uname -s)" ;;
     esac
 
     echo "${arch}-${os}"
 }
 
-build_download_url() {
-    local version="$1"
-    local target="$2"
-    local filename="uv-${target}.tar.gz"
-    echo "${GITHUB_PROXY}https://github.com/astral-sh/uv/releases/download/${version}/${filename}"
-    info "构建下载 URL: $url"
 
-}
 
 install_uv_binary() {
     local temp_dir="$1"
@@ -159,9 +124,8 @@ install_uv_binary() {
 }
 
 download_and_install_uv() {
-    local version=$(get_latest_version)
     local target=$(detect_system)
-    local url=$(build_download_url "$version" "$target")
+    local url=(https://github.com/astral-sh/uv/releases/latest/download/uv-${target}.tar.gz)
     local temp_dir="/tmp/uv_install_$$"
     mkdir -p "$temp_dir"
     trap 'rm -rf "$temp_dir"' EXIT
@@ -192,7 +156,7 @@ install_uv_official_script() {
 }
 
 configure_uv_mirror() {
-    uv pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple/ 2>/dev/null || true
+    uv pip config set global.index-url https://mirrors.ustc.edu.cn/pypi/simple/ 2>/dev/null || true
 }
 
 update_shell_config() {
