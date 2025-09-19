@@ -334,6 +334,13 @@ install_system_dependencies() {   #定义函数
         packages+=("curl")   #添加 curl 到数组
     fi                                  #结束条件判断
     
+    # Arch 系统特殊处理：添加 uv 到必需包数组
+    if [[ "$ID" == "arch" ]]; then
+        # 只有 Arch 才用包管理器安装 uv
+        packages+=("uv")
+        info "已将 uv 添加到 Arch 的必需安装包列表"
+    fi
+
     # 检查 pip
     if ! command_exists pip3 && ! command_exists pip; then   #如果 pip3 和 pip 都不存在
         case $PKG_MANAGER in                                 #根据包管理器选择 pip 包名称
@@ -371,202 +378,7 @@ install_uv_environment() {
         ok "uv 已安装"
     else
         info "安装 uv..."
-        
-        # 方法1: GitHub 预编译包安装 (优先)
-        info "从 GitHub 下载预编译 uv 包..."
-        
-        # 检测架构
-        local arch
-        case "$(uname -m)" in
-            x86_64) arch="x86_64" ;;
-            aarch64) arch="aarch64" ;;
-            arm64) arch="aarch64" ;;  # ARM64 作为 aarch64 处理
-            armv7) arch="armv7" ;;
-            *) err "不支持的架构: $(uname -m)" ;;
-        esac
-        
-        # 检测操作系统及C库类型
-        local os
-        local libc
-        case "$(uname -s)" in
-            Linux)
-                os="unknown-linux-gnu"
-                # 检测是否为musl环境 (比如 Alpine)
-                if [ -f "/lib/ld-musl-x86_64.so.1" ] || [ -f "/lib/ld-musl-aarch64.so.1" ]; then
-                    libc="musl"
-                    os="unknown-linux-musl"
-                else
-                    libc="glibc"
-                fi
-                ;;
-            Darwin) 
-                os="apple-darwin"
-                libc="glibc"  # macOS 使用 glibc
-                ;;
-            *) err "不支持的操作系统: $(uname -s)" ;;
-        esac
-        
-        # 根据操作系统和架构选择下载链接
-        local uv_filename="uv-${arch}-${os}.tar.gz"
-        local uv_url="${GITHUB_PROXY}https://github.com/astral-sh/uv/releases/latest/download/${uv_filename}"
-        local temp_dir="/tmp/uv_install_$$"
-        
-        # 创建临时目录
-        mkdir -p "$temp_dir" || err "无法创建临时目录"
-        cd "$temp_dir" || err "无法进入临时目录"
-        
-        # 下载并解压
-        if download_with_retry "$uv_url" "uv.tar.gz"; then
-            info "解压 uv 安装包..."
-            if tar -xzf "uv.tar.gz"; then
-                # 列出解压后的文件，确保 uv 文件存在
-                ls -la
-                
-                # 修复：更灵活地查找uv目录，支持各种架构和系统
-                local uv_dir
-                # 首先尝试查找包含uv的目录
-                uv_dir=$(find . -maxdepth 1 -type d -name "uv-*" | head -n 1)
-                
-                # 如果没找到，尝试其他可能的模式
-                if [[ -z "$uv_dir" ]]; then
-                    uv_dir=$(ls -d */ 2>/dev/null | grep -E '^uv-' | head -n 1)
-                fi
-                
-                # 如果还是没找到，列出所有目录供调试
-                if [[ -z "$uv_dir" ]]; then
-                    warn "未找到预期的uv目录，当前目录内容："
-                    ls -la
-                    err "无法找到解压后的 uv 目录"
-                fi
-                
-                # 去掉可能的尾部斜杠
-                uv_dir="${uv_dir%/}"
-                info "找到 uv 目录: $uv_dir"
-                
-                # 进入解压后的文件夹
-                cd "$uv_dir" || err "进入解压目录失败"
-                
-                # 查找 uv 可执行文件
-                if [ -f "uv" ]; then
-                    info "找到 uv 可执行文件，开始安装..."
-                    
-                    # 创建用户本地bin目录
-                    mkdir -p "$HOME/.local/bin"
-                    
-                    # 复制可执行文件
-                    if cp "uv" "$HOME/.local/bin/uv"; then
-                        chmod +x "$HOME/.local/bin/uv"
-                        export PATH="$HOME/.local/bin:$PATH"
-                        
-                        # 验证安装
-                        if "$HOME/.local/bin/uv" --version >/dev/null 2>&1; then
-                            ok "uv 从 GitHub 安装成功"
-                            # 显示版本信息
-                            local uv_version
-                            uv_version=$("$HOME/.local/bin/uv" --version 2>/dev/null | head -n 1)
-                            info "安装的 uv 版本: $uv_version"
-                            cd "$DEPLOY_DIR" && rm -rf "$temp_dir"
-                        else
-                            warn "uv 安装后验证失败，尝试备用方法..."
-                        fi
-                    else
-                        warn "复制 uv 可执行文件失败，尝试备用方法..."
-                    fi
-                else
-                    # 列出当前目录内容供调试
-                    warn "在目录 $uv_dir 中找不到 uv 可执行文件，目录内容："
-                    ls -la
-                    err "解压包中找不到 uv 可执行文件"
-                fi
-            else
-                warn "解压失败，尝试备用方法..."
-            fi
-        else
-            warn "下载失败，尝试备用方法..."
-        fi
-        
-        # 清理临时目录
-        cd "$DEPLOY_DIR" 2>/dev/null || true
-        rm -rf "$temp_dir" 2>/dev/null || true
-        
-        # 方法2: 官方脚本安装 (备选)
-        if ! command_exists uv; then
-            info "GitHub 包安装失败，使用官方安装脚本..."
-            if command_exists curl; then
-                if curl -LsSf https://astral.sh/uv/install.sh | sh; then
-                    export PATH="$HOME/.local/bin:$PATH"
-                    # 检查多个可能的安装位置
-                    if command_exists uv || [[ -x "$HOME/.local/bin/uv" ]] || [[ -x "$HOME/.cargo/bin/uv" ]]; then
-                        ok "uv 通过官方脚本安装成功"
-                        # 确保PATH包含正确的目录
-                        export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
-                        # 显示版本信息
-                        local uv_version
-                        uv_version=$(uv --version 2>/dev/null | head -n 1)
-                        info "安装的 uv 版本: $uv_version"
-                    else
-                        err "官方安装脚本安装后找不到 uv 可执行文件"
-                    fi
-                else
-                    err "官方安装脚本执行失败"
-                fi
-            else
-                err "无法安装 uv，请手动安装 curl 或从 https://github.com/astral-sh/uv/releases 下载"
-            fi
-        fi
-    fi
-    
-    # 配置镜像
-    info "配置 uv 使用清华大学镜像..."
-    uv pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple/ 2>/dev/null || true
-    
-    ok "uv 环境配置完成"
-    
-    # 将 uv 安装路径添加到配置文件
-    info "将 uv 安装路径添加到配置文件..."
-    
-    # 定义要添加的PATH设置
-    local path_export='export PATH="$HOME/.local/bin:$PATH"'
-    local fish_path_set='set -gx PATH "$HOME/.local/bin" $PATH'
-    
-    # 检查是否安装了 Bash，并修改 ~/.bashrc
-    if command_exists bash && [ -f "$HOME/.bashrc" ]; then
-        # 检查是否已经存在相同的PATH设置，避免重复添加
-        if ! grep -q 'export PATH="$HOME/.local/bin:$PATH"' "$HOME/.bashrc"; then
-            echo "$path_export" >> "$HOME/.bashrc"
-            info "已添加 uv 路径到 ~/.bashrc"
-        fi
-    fi
-    
-    # 检查是否安装了 Zsh，并修改 ~/.zshrc
-    if command_exists zsh && [ -f "$HOME/.zshrc" ]; then
-        if ! grep -q 'export PATH="$HOME/.local/bin:$PATH"' "$HOME/.zshrc"; then
-            echo "$path_export" >> "$HOME/.zshrc"
-            info "已添加 uv 路径到 ~/.zshrc"
-        fi
-    fi
-    
-    # 检查是否安装了 Fish，并修改 ~/.config/fish/config.fish
-    if command_exists fish; then
-        local fish_config="$HOME/.config/fish/config.fish"
-        mkdir -p "$(dirname "$fish_config")"
-        if [ -f "$fish_config" ]; then
-            if ! grep -q 'set -gx PATH "$HOME/.local/bin"' "$fish_config"; then
-                echo "$fish_path_set" >> "$fish_config"
-                info "已添加 uv 路径到 ~/.config/fish/config.fish"
-            fi
-        else
-            echo "$fish_path_set" > "$fish_config"
-            info "已创建 ~/.config/fish/config.fish 并添加 uv 路径"
-        fi
-    fi
-    
-    # 提示用户重新加载配置或重新登录
-    info "请运行以下命令重新加载配置，或重新登录终端："
-    info "  source ~/.bashrc    # 对于 Bash 用户"
-    info "  source ~/.zshrc     # 对于 Zsh 用户"
-}
-
+        bash <(curl -sSL "${GITHUB_PROXY}https://github.com/Astriora/Antlia/raw/refs/heads/main/Script/UV/uv_install.sh") --GITHUB-URL "$GITHUB_PROXY"
 
 
 # =============================================================================
@@ -575,8 +387,8 @@ install_uv_environment() {
 clone_astrbot() { #定义函数
     print_title "克隆 AstrBot 项目" #打印标题
     
-    echo "SCRIPT_DIR is: $SCRIPT_DIR" 2>/dev/null 
-    echo "DEPLOY_DIR is: $DEPLOY_DIR" 2>/dev/null 
+    info "目录 $SCRIPT_DIR"
+    info "目录 $DEPLOY_DIR"
     cd "$DEPLOY_DIR" #进入部署目录
      # 如果目录已存在，提示用户选择是否删除
     
