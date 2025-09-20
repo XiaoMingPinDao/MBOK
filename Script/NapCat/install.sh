@@ -193,8 +193,29 @@ install_rpm_package() {
 
 install_deb_package() {
     local file="$1"
-    $SUDO dpkg -i "$file" || $SUDO apt-get install -f -y -qq
-    $SUDO apt-get install -y -qq libnss3 libgbm1 libasound2
+    info "安装: $file"
+    
+    # 更新包列表
+    info "更新软件包列表..."
+    $SUDO apt-get update -qq
+    
+    # 先安装基础依赖
+    info "安装基础依赖包..."
+    $SUDO apt-get install -y -qq libgtk-3-0 libnotify4 libnss3 libxss1 libxtst6 xdg-utils libatspi2.0-0 libsecret-1-0 libgbm1 || true
+    
+    # 再尝试安装包
+    info "安装 LinuxQQ 包..."
+    if ! $SUDO dpkg -i "$file"; then
+        info "修复依赖关系..."
+        $SUDO apt-get install -f -y
+    fi
+    
+    # 尝试安装音频依赖
+    if ! $SUDO apt-get install -y -qq libasound2 2>/dev/null; then
+        warn "libasound2 安装失败，可能不影响 QQ 基本功能"
+    fi
+    
+    ok "LinuxQQ 安装完成"
 }
 
 install_linuxqq() {
