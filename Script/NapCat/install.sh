@@ -193,20 +193,61 @@ install_rpm_package() {
 
 install_deb_package() {
     local file="$1"
-    $SUDO dpkg -i "$file" || $SUDO apt-get install -f -y -qq
-    $SUDO apt-get install -y -qq libnss3 libgbm1 libasound2
-}
+    info "安装 deb 包: $file"
+    
+    # 先尝试安装包
+    if ! $SUDO dpkg -i "$file" 2>/dev/null; then
+        info "修复依赖关系..."
 
 install_linuxqq() {
     get_system_arch
     local url file_name
-    case "$system_arch" in
-        amd64) file_name=$(command_exists rpm && url="https://dldir1.qq.com/qqfile/qq/QQNT/c773cdf7/linuxqq_3.2.19-39038_x86_64.rpm" || url="https://dldir1.qq.com/qqfile/qq/QQNT/c773cdf7/linuxqq_3.2.19-39038_amd64.deb") ;;
-        arm64) file_name=$(command_exists rpm && url="https://dldir1.qq.com/qqfile/qq/QQNT/c773cdf7/linuxqq_3.2.19-39038_aarch64.rpm" || url="https://dldir1.qq.com/qqfile/qq/QQNT/c773cdf7/linuxqq_3.2.19-39038_arm64.deb") ;;
-    esac
+    
+    # 根据系统架构和包管理器选择正确的包
+    if command_exists rpm; then
+        case "$system_arch" in
+            amd64) 
+                url="https://dldir1.qq.com/qqfile/qq/QQNT/c773cdf7/linuxqq_3.2.19-39038_x86_64.rpm"
+                ;;
+            arm64) 
+                url="https://dldir1.qq.com/qqfile/qq/QQNT/c773cdf7/linuxqq_3.2.19-39038_aarch64.rpm"
+                ;;
+            *)
+                err "不支持的架构: $system_arch"
+                return 1
+                ;;
+        esac
+    else
+        case "$system_arch" in
+            amd64) 
+                url="https://dldir1.qq.com/qqfile/qq/QQNT/c773cdf7/linuxqq_3.2.19-39038_amd64.deb"
+                ;;
+            arm64) 
+                url="https://dldir1.qq.com/qqfile/qq/QQNT/c773cdf7/linuxqq_3.2.19-39038_arm64.deb"
+                ;;
+            *)
+                err "不支持的架构: $system_arch"
+                return 1
+                ;;
+        esac
+    fi
+    
     file_name=$(basename "$url")
-    [[ ! -f "$file_name" ]] && download_with_retry "$url" "$file_name"
-    [[ "$file_name" == *.rpm ]] && install_rpm_package "$file_name" || install_deb_package "$file_name"
+    info "下载 LinuxQQ: $file_name"
+    
+    if [[ ! -f "$file_name" ]]; then
+        if ! download_with_retry "$url" "$file_name"; then
+            err "下载 LinuxQQ 失败"
+            return 1
+        fi
+    fi
+    
+    if [[ "$file_name" == *.rpm ]]; then
+        install_rpm_package "$file_name"
+    else
+        install_deb_package "$file_name"
+    fi
+    
     rm -f "$file_name"
 }
 
@@ -297,7 +338,7 @@ install_napcat(){
     $SUDO mkdir -p "$napcat_dir"
 
     # 下载带重试
-    download_with_retry "https://github.com/NapNeko/NapCatQQ/releases/latest/download/NapCat.Shell.zip" "NapCat.Shell.zip"
+    download_with_retry "${GITHUB_PROXY}https://github.com/NapNeko/NapCatQQ/releases/latest/download/NapCat.Shell.zip" "NapCat.Shell.zip"
 
     $SUDO unzip -o NapCat.Shell.zip -d "$napcat_dir"
     rm -f NapCat.Shell.zip

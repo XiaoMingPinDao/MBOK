@@ -125,7 +125,7 @@ install_uv_binary() {
 
 download_and_install_uv() {
     local target=$(detect_system)
-    local url=(https://github.com/astral-sh/uv/releases/latest/download/uv-${target}.tar.gz)
+    local url=(${GITHUB_PROXY}https://github.com/astral-sh/uv/releases/latest/download/uv-${target}.tar.gz)
     local temp_dir="/tmp/uv_install_$$"
     mkdir -p "$temp_dir"
     trap 'rm -rf "$temp_dir"' EXIT
