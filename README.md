@@ -27,7 +27,11 @@ bash (curl -sSL https://github.com/zhende1113/Antlia/raw/refs/heads/main/Script/
 bash <(curl -sSL https://github.com/Astriora/Antlia/raw/refs/heads/main/Script/UV/uv_install.sh)
 ```
 
+```bash
 
+
+bash <(curl -sSL https://github.com/Astriora/Antlia/raw/refs/heads/main/Script/NapCat/install.sh)
+```
 ### 从会话分离
 
 - **tmux**：`Ctrl+b, d`
