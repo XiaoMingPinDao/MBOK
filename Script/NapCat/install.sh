@@ -197,11 +197,11 @@ install_deb_package() {
     
     # 更新包列表
     info "更新软件包列表..."
-    $SUDO apt-get update -qq
+    $SUDO apt-get update 
     
     # 先安装基础依赖
     info "安装基础依赖包..."
-    $SUDO apt-get install -y -qq libgtk-3-0 libnotify4 libnss3 libxss1 libxtst6 xdg-utils libatspi2.0-0 libsecret-1-0 libgbm1 || true
+    $SUDO apt-get install -y  libgtk-3-0 libnotify4 libnss3 libxss1 libxtst6 xdg-utils libatspi2.0-0 libsecret-1-0 libgbm1 || true
     
     # 再尝试安装包
     info "安装 LinuxQQ 包..."
@@ -211,7 +211,7 @@ install_deb_package() {
     fi
     
     # 尝试安装音频依赖
-    if ! $SUDO apt-get install -y -qq libasound2 2>/dev/null; then
+    if ! $SUDO apt-get install -y  libasound2 2>/dev/null; then
         warn "libasound2 安装失败，可能不影响 QQ 基本功能"
     fi
     
