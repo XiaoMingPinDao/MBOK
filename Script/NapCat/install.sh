@@ -193,11 +193,9 @@ install_rpm_package() {
 
 install_deb_package() {
     local file="$1"
-    info "安装 deb 包: $file"
-    
-    # 先尝试安装包
-    if ! $SUDO dpkg -i "$file" 2>/dev/null; then
-        info "修复依赖关系..."
+    $SUDO dpkg -i "$file" || $SUDO apt-get install -f -y -qq
+    $SUDO apt-get install -y -qq libnss3 libgbm1 libasound2
+}
 
 install_linuxqq() {
     get_system_arch
@@ -385,3 +383,4 @@ main() {
 }
 
 main "$@"
+
