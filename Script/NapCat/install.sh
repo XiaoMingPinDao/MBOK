@@ -211,7 +211,7 @@ install_deb_package() {
     fi
     
     # 尝试安装音频依赖
-    if ! $SUDO apt-get install -y  libasound2 2>/dev/null; then
+    if ! $SUDO apt-get install -y  libasound2-dev alsa-utils ; then
         warn "libasound2 安装失败，可能不影响 QQ 基本功能"
     fi
     
