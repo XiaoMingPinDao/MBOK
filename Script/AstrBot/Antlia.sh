@@ -442,9 +442,6 @@ install_python_dependencies() {  # 定义函数
         export UV_INDEX_URL="https://mirrors.ustc.edu.cn/pypi/simple/"
         mkdir -p ~/.cache/uv
         chown -R "$(whoami):$(whoami)" ~/.cache/uv
-        info "正在使用镜像源生成uv.lock 以加快同步速度"
-        uv lock --index-url https://pypi.tuna.tsinghua.edu.cn/simple/
-        info "生成完毕开始同步"
         # 使用 uv sync 安装依赖
         attempt=1
         while [[ $attempt -le 3 ]]; do
