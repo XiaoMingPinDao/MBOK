@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # AstrBot Shell部署脚本
-# 版本: 2025/09/18
+# 版本: 2025/09/21
 
-set -o pipefail
+set -euo pipefail
 
 # =============================================================================
 # 路径与常量定义
@@ -16,8 +16,10 @@ GITHUB_PROXY=""                                             # GitHub 代理URL
 PKG_MANAGER=""                                              # 包管理器
 DISTRO=""                                                   # 发行版
 ENV_TYPE=""                                                 # Python 环境类型
-echo "您当前的目录是: $SCRIPT_DIR" 2>/dev/null
-echo "DEPLOY_DIR is: $DEPLOY_DIR" 2>/dev/null # 鬼知道这是为什么 
+SUDO=""
+
+echo "SCRIPT_DIR: $SCRIPT_DIR" 
+echo "DEPLOY_DIR: $DEPLOY_DIR" # 鬼知道这是为什么 
 
 #------------------------------------------------------------------------------
 
@@ -227,7 +229,7 @@ detect_package_manager() {                          #定义函数
         "dnf:Fedora/RHEL/CentOS"
         "yum:RHEL/CentOS (老版本)"
         "zypper:openSUSE"
-        #"apk:Alpine Linux"
+        "apk:Alpine Linux"
         "brew:macOS/Linux (Homebrew)"
     ) #结束数组定义
     
@@ -254,7 +256,7 @@ detect_package_manager() {                          #定义函数
 # =============================================================================
 detect_system() {                               #定义函数
     print_title "检测系统环境"                     #打印标题
-    
+    ID="${ID:-}"
     # 检测架构
     ARCH=$(uname -m)                          #获取系统架构
     case $ARCH in # 根据架构打印信息
@@ -380,7 +382,7 @@ install_uv_environment() {
         info "安装 uv..."
         bash <(curl -sSL "${GITHUB_PROXY}https://github.com/Astriora/Antlia/raw/refs/heads/main/Script/UV/uv_install.sh") --GITHUB-URL "$GITHUB_PROXY"
     fi
-    source ~/.bashrc
+    [[ -f ~/.bashrc ]] && source ~/.bashrc
     export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
 }
 # =============================================================================
@@ -433,8 +435,12 @@ install_python_dependencies() {  # 定义函数
     cd "$DEPLOY_DIR/AstrBot" || err "无法进入 AstrBot 目录" # 进入目录
 
         # 设置环境变量使 uv 使用 pip 镜像配置
-        export UV_INDEX_URL="https://mirrors.ustc.edu.cn/pypi/simple"
-
+        export UV_INDEX_URL="https://mirrors.ustc.edu.cn/pypi/simple/"
+        mkdir -p ~/.cache/uv
+        chown -R "$(whoami):$(whoami)" ~/.cache/uv
+        info "正在使用镜像源生成uv.lock 以加快同步速度"
+        uv lock --index-url https://pypi.tuna.tsinghua.edu.cn/simple/
+        info "生成完毕开始同步"
         # 使用 uv sync 安装依赖
         attempt=1
         while [[ $attempt -le 3 ]]; do
@@ -448,10 +454,10 @@ install_python_dependencies() {  # 定义函数
             fi
         done
 
-        # 如果 uv sync 仍然失败，改用 pip
+        # 如果 uv sync失败退出脚本
         if [[ $attempt -gt 3 ]]; then
             err "uv sync 失败 脚本将停止"
-            exit 0
+            exit 1
 
         fi
     ok "Python 依赖安装完成" # 打印成功日志
@@ -485,7 +491,7 @@ main() { #定义主函数
     astrbot_art
     print_title "AstrBot Shell部署脚本" #打印标题
 
-    info "脚本版本: 2025/09/18" #打印版本信息
+    info "脚本版本: 2025/09/21" #打印版本信息
     
     # 执行部署步骤
     select_github_proxy #选择 GitHub 代理
@@ -506,10 +512,6 @@ main() { #定义主函数
 
 }
 
-# 检查是否以 root 用户运行
-#if [[ $EUID -eq 0 ]]; then 
-#    err "请不要使用 root 用户运行此脚本"
-#fi
 
 # 执行主函数
 main
