@@ -125,25 +125,27 @@ check_tmux_directory() {
 #------------------------------------------------------------------------------
 
 check_root_or_sudo() {
-    # 检查当前是否为 root 用户或使用 sudo 运行
-    if [[ "$(id -u)" -eq 0 ]]; then
-        # 如果是 root 用户
+
+    if [[ $EUID -eq 0 ]]; then
+        # root 用户
         echo -e "\e[31m警告：您当前以 root 用户身份运行此脚本！\e[0m"
-    elif [[ $EUID -ne 0 && $(sudo -v > /dev/null 2>&1; echo $?) -eq 0 ]]; then
-        # 如果是使用 sudo 运行
+    elif sudo -v >/dev/null 2>&1; then
+        # 普通用户 + 有 sudo 权限
         echo -e "\e[31m警告：您当前以 sudo 权限运行此脚本！\e[0m"
     else
-        # 用户既不是 root 也没有使用 sudo
+        # 普通用户 + 无 sudo
+        ok "以普通用户运行，无需管理员权限"
         return 0
     fi
 
-    # 提示用户确认是否继续
+    # 手动确认
     read -p "您是否确认以管理员权限运行此脚本？请输入 'yes' 继续： " confirm
     if [[ "$confirm" != "yes" ]]; then
         echo "操作已取消。"
         exit 1
     fi
 }
+
 
 
 # =============================================================================
