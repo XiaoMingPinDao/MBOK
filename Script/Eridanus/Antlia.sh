@@ -169,10 +169,10 @@ install_mamba_environment() {
   micromamba config prepend channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/
 
   info "创建 Python 3.11 虚拟环境 (Eridanus)..."
-  micromamba create -n Eridanus python=3.11 -y || err "虚拟环境创建失败"
+  micromamba create -n Eridanus python=3.11 -c https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/ --override-channels -y || err "虚拟环境创建失败"
 
   info "安装图形库依赖 pycairo..."
-  micromamba run -n Eridanus micromamba install pycairo -y || warn "pycairo 安装失败，可能需要手动安装"
+  micromamba run -n Eridanus micromamba install pycairo  -c https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/ --override-channels -y || warn "pycairo 安装失败，可能需要手动安装"
 
   ok "Micromamba 环境配置完成"
 }
