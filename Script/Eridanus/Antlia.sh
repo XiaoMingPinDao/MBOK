@@ -7,7 +7,8 @@ set -o pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DEPLOY_DIR="$SCRIPT_DIR/bot"
 DEPLOY_STATUS_FILE="$SCRIPT_DIR/bot/deploy.status"
-
+echo "SCRIPT_DIR: $SCRIPT_DIR" 
+echo "DEPLOY_DIR: $DEPLOY_DIR" # 鬼知道这是为什么 
 # --- 全局变量 ---
 GITHUB_PROXY=""
 MINICONDA_ARCH=""
