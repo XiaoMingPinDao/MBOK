@@ -157,9 +157,10 @@ install_mamba_environment() {
   info "当前mamba版本号是 $LATEST"
 
   info "下载 Mambaforge 安装脚本..."
-  download_with_retry "https://raw.githubusercontent.com/Astriora/Antlia/refs/heads/main/Script/Micromamba/Micromamba_install.sh" "Micromamba_install.sh"
+  local Micromamba_url="${GITHUB_PROXY}https://raw.githubusercontent.com/Astriora/Antlia/refs/heads/main/Script/Micromamba/Micromamba_install.sh"
+  download_with_retry "$Micromamba_url" "Micromamba_install.sh"
   chmod +x Micromamba_install.sh
-  ./install_micromamba.sh --GITHUBPROXYURL="https://ghfast.top/" --BIN_FOLDER="$HOME/bin" --INIT_YES=yes
+  ./install_micromamba.sh --GITHUBPROXYURL="${GITHUB_PROXY}" --BIN_FOLDER="$HOME/bin" --INIT_YES=yes
   export PATH="$HOME/.local/bin:$PATH"
 
   info "运行 Mambaforge 安装脚本..."
