@@ -32,6 +32,22 @@ bash <(curl -sSL https://github.com/Astriora/Antlia/raw/refs/heads/main/Script/U
 
 bash <(curl -sSL https://github.com/Astriora/Antlia/raw/refs/heads/main/Script/NapCat/install.sh)
 ```
+
+
+
+
+```bash
+
+
+bash <(curl -sSL https://ghfast.top/https://raw.githubusercontent.com/Astriora/Antlia/refs/heads/main/Script/Eridanus/Antlia.sh)
+```
+
+
+
+
+
+
+
 ### 从会话分离
 
 - **tmux**：`Ctrl+b, d`
