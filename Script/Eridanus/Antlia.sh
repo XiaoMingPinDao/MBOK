@@ -147,11 +147,16 @@ install_system_dependencies() {
 install_mamba_environment() {
   print_title "安装和配置 Mamba 环境 (Micromamba)"
 
-  info "下载 Micromamba 安装脚本..."
-  local Micromamba_url="${GITHUB_PROXY}https://raw.githubusercontent.com/Astriora/Antlia/refs/heads/main/Script/Micromamba/Micromamba_install.sh"
-  download_with_retry "$Micromamba_url" "Micromamba_install.sh"
-  chmod +x Micromamba_install.sh
-  bash Micromamba_install.sh --GITHUBPROXYURL="${GITHUB_PROXY}" --BIN_FOLDER="$HOME/bin" --INIT_YES=yes
+  # 检查是否已安装
+  if command -v micromamba &>/dev/null; then
+    ok "检测到 micromamba 已安装: $(command -v micromamba)"
+  else
+    info "下载 Micromamba 安装脚本..."
+    local Micromamba_url="${GITHUB_PROXY}https://raw.githubusercontent.com/Astriora/Antlia/refs/heads/main/Script/Micromamba/Micromamba_install.sh"
+    download_with_retry "$Micromamba_url" "Micromamba_install.sh"
+    chmod +x Micromamba_install.sh
+    bash Micromamba_install.sh --GITHUBPROXYURL="${GITHUB_PROXY}" --BIN_FOLDER="$HOME/bin" --INIT_YES=yes
+  fi
 
   # 加入 PATH 并初始化 shell hook
   export PATH="$HOME/bin:$PATH"
@@ -166,14 +171,12 @@ install_mamba_environment() {
   info "创建 Python 3.11 虚拟环境 (Eridanus)..."
   micromamba create -n Eridanus python=3.11 -y || err "虚拟环境创建失败"
 
-  # 激活环境
-  micromamba activate Eridanus
-
   info "安装图形库依赖 pycairo..."
-  micromamba install -n Eridanus pycairo -y || warn "pycairo 安装失败，可能需要手动安装"
+  micromamba run -n Eridanus micromamba install pycairo -y || warn "pycairo 安装失败，可能需要手动安装"
 
   ok "Micromamba 环境配置完成"
 }
+
 
 
 # =============================================================================
