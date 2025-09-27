@@ -74,7 +74,7 @@ start_service_background() {
   [[ -n "$log_file" ]] && >"$log_file"
 
   if [[ "$type" == "tmux" ]]; then
-    tmux new-session -d -s "$session_name" "cd '$work_dir' && mamba run -n Eridanus python main.py > '$log_file' 2>&1"
+    tmux new-session -d -s "$session_name" "cd '$work_dir' && micromamba run -n Eridanus python main.py > '$log_file' 2>&1"
   elif [[ "$type" == "screen" ]]; then
     local cmd_for_screen="cd '$work_dir' && ./$start_cmd > '$log_file' 2>&1"
     screen -dmS "$session_name" bash -c "$cmd_for_screen"
@@ -185,10 +185,10 @@ eridanus_menu() {
 
     case $choice in
     1) start_service_background "tmux" "Eridanus" "$TMUX_SESSION_ERIDANUS" "$DEPLOY_DIR/Eridanus" "python main.py"; read -rp "Enter 返回..." ;;
-    2) (cd "$DEPLOY_DIR/Eridanus" && mamba run -n Eridanus python main.py); read -rp "Enter 返回..." ;;
+    2) (cd "$DEPLOY_DIR/Eridanus" && micromamba run -n Eridanus python main.py); read -rp "Enter 返回..." ;;
     3) stop_service "Eridanus"; read -rp "Enter 返回..." ;;
     4) tmux attach -t "$TMUX_SESSION_ERIDANUS"; read -rp "Enter 返回..." ;;
-    5) (cd "$DEPLOY_DIR/Eridanus" && mamba run -n Eridanus python tool.py); read -rp "Enter 返回..." ;;
+    5) (cd "$DEPLOY_DIR/Eridanus" && micromamba run -n Eridanus python tool.py); read -rp "Enter 返回..." ;;
     q|Q) break ;;
     *) warn "无效输入" ;;
     esac
@@ -226,7 +226,7 @@ main() {
   export PATH="$HOME/.local/bin:$PATH"
 
   mkdir -p "$LOG_DIR"
-  check_command tmux screen mamba pkill
+  check_command tmux screen pkill micromamba
   main_menu
 }
 
