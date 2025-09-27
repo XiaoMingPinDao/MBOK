@@ -147,9 +147,12 @@ install_system_dependencies() {
 install_mamba_environment() {
   print_title "安装和配置 Mamba 环境 (Mambaforge)"
   [[ -d "$HOME/mambaforge/envs/Eridanus" ]] && ok "检测到 Mamba 环境 'Eridanus' 已存在" && return
+  LATEST=$(curl -s "${GITHUB_PROXY}https://api.github.com/repos/conda-forge/miniforge/releases/latest" \
+         | grep -oP '"tag_name":\s*"\K[^"]+')
+  info "当前mamba版本号是 $LATEST"
 
   info "下载 Mambaforge 安装脚本..."
-  local url="${GITHUB_PROXY}https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-$MINICONDA_ARCH.sh"
+  local url="${GITHUB_PROXY}https://github.com/conda-forge/miniforge/releases/download/$LATEST/Mambaforge-$LATEST-Linux-$MINICONDA_ARCH.sh"
   download_with_retry "$url" "mambaforge.sh"
 
   info "运行 Mambaforge 安装脚本..."
@@ -163,13 +166,14 @@ install_mamba_environment() {
   ok "Mamba 安装成功！"
 
   info "配置镜像源..."
-  conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/ >/dev/null 2>&1
-  conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/ >/dev/null 2>&1
+  conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/ --prepend
+  conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/ --prepend
+
 
   info "创建 Python 3.11 虚拟环境 (Eridanus)..."
   mamba create -n Eridanus python=3.11 -y || err "虚拟环境创建失败"
   source "$HOME/mambaforge/etc/profile.d/conda.sh"
-  conda activate Eridanus || source "$HOME/.bashrc" && conda activate Eridanus
+  (conda activate Eridanus) || (source "$HOME/.bashrc" && conda activate Eridanus)
 
   info "安装图形库依赖 pycairo..."
   mamba install pycairo -y || warn "pycairo 安装失败，可能需要手动安装"
