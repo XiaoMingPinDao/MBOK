@@ -157,7 +157,7 @@ install_mamba_environment() {
   info "当前mamba版本号是 $LATEST"
 
   info "下载 Mambaforge 安装脚本..."
-  local url="${GITHUB_PROXY}https://github.com/conda-forge/miniforge/releases/download/$LATEST/Mambaforge-$LATEST-Linux-$MINICONDA_ARCH.sh"
+  local url="${GITHUB_PROXY}https://github.com/conda-forge/miniforge/releases/download/$LATEST/Mambaforge3-$LATEST-Linux-$MINICONDA_ARCH.sh"
   download_with_retry "$url" "mambaforge.sh"
 
   info "运行 Mambaforge 安装脚本..."
