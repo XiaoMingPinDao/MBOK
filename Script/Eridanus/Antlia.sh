@@ -145,34 +145,36 @@ install_system_dependencies() {
 }
 
 install_mamba_environment() {
-  print_title "安装和配置 Mamba 环境 (Mambaforge)"
+  print_title "安装和配置 Mamba 环境 (Micromamba)"
 
-
-  info "下载 Mambaforge 安装脚本..."
+  info "下载 Micromamba 安装脚本..."
   local Micromamba_url="${GITHUB_PROXY}https://raw.githubusercontent.com/Astriora/Antlia/refs/heads/main/Script/Micromamba/Micromamba_install.sh"
   download_with_retry "$Micromamba_url" "Micromamba_install.sh"
   chmod +x Micromamba_install.sh
   bash Micromamba_install.sh --GITHUBPROXYURL="${GITHUB_PROXY}" --BIN_FOLDER="$HOME/bin" --INIT_YES=yes
-  export PATH="$HOME/.local/bin:$PATH"
 
-  source ~/.bashrc 2>/dev/null || true
-  export PATH="$HOME/.local/bin:$PATH"
-  ok "Mamba 安装成功！"
+  # 加入 PATH 并初始化 shell hook
+  export PATH="$HOME/bin:$PATH"
+  eval "$($HOME/bin/micromamba shell hook -s bash)"
+
+  ok "Micromamba 安装成功！"
 
   info "配置镜像源..."
-  conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/ --prepend
-  conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/ --prepend
-
+  micromamba config prepend channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/
+  micromamba config prepend channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/
 
   info "创建 Python 3.11 虚拟环境 (Eridanus)..."
-  mamba create -n Eridanus python=3.11 -y || err "虚拟环境创建失败"
-  source "$HOME/mambaforge/etc/profile.d/conda.sh"
-  (conda activate Eridanus) || (source "$HOME/.bashrc" && conda activate Eridanus)
+  micromamba create -n Eridanus python=3.11 -y || err "虚拟环境创建失败"
+
+  # 激活环境
+  micromamba activate Eridanus
 
   info "安装图形库依赖 pycairo..."
-  mamba install pycairo -y || warn "pycairo 安装失败，可能需要手动安装"
-  ok "Mamba 环境配置完成"
+  micromamba install -n Eridanus pycairo -y || warn "pycairo 安装失败，可能需要手动安装"
+
+  ok "Micromamba 环境配置完成"
 }
+
 
 # =============================================================================
 # 项目安装
@@ -192,8 +194,7 @@ clone_eridanus() {
 install_python_dependencies() {
   print_title "安装 Python 依赖"
   cd "$DEPLOY_DIR/Eridanus" || err "无法进入 Eridanus 目录"
-  source "$HOME/mambaforge/etc/profile.d/conda.sh"
-  conda activate Eridanus || source "$HOME/.bashrc" && conda activate Eridanus
+  micromamba activate Eridanus || source "$HOME/.bashrc" && micromamba activate Eridanus
   pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple >/dev/null 2>&1
   python -m pip install --upgrade pip || warn "pip 升级失败"
   pip install -r requirements.txt || err "依赖安装失败"
