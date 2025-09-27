@@ -1,0 +1,37 @@
+name: Deploy VitePress Site
+
+on:
+  push:
+    branches:
+      - main  # main 分支更新时触发
+  workflow_dispatch: # 手动触发
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          cd docs
+          npm install
+
+      - name: Build site
+        run: |
+          cd docs
+          npx vitepress build
+
+      - name: Deploy to branch
+        uses: peaceiris/actions-gh-pages@v6
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs/.vitepress/dist
+          publish_branch: gh-pages  # 部署分支
