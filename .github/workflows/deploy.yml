@@ -1,39 +1,51 @@
+# .github/workflows/deploy.yml
 name: Deploy VitePress Site
 
+# 定时触发 & 手动触发
 on:
   schedule:
-    - cron: '12 12 * * *'  # 每天 20:00 北京时间（UTC 12:00）
-    - cron: '0 19 * * *'   # 每天 03:00 北京时间（UTC 19:00）
-  workflow_dispatch:  # 手动触发
+    # 每天北京时间 20:00 (UTC 12:00) 和 03:00 (UTC 19:00)
+    - cron: '0 12 * * *'
+    - cron: '0 19 * * *'
+  workflow_dispatch:
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. 拉取仓库代码
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # 保留完整 git 历史以便推送
 
+      # 2. 设置 Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
 
+      # 3. 安装依赖
       - name: Install dependencies
         run: |
           cd docs
           npm install
 
+      # 4. 构建 VitePress 网站
       - name: Build VitePress site
         run: |
           cd docs
           npx vitepress build
 
+      # 5. 部署到 gh-pages
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: docs/.vitepress/dist
+          personal_token: ${{ secrets.PERSONAL_TOKEN }} # 使用你创建的 secret
           publish_branch: gh-pages
+          publish_dir: docs/.vitepress/dist
           force_orphan: true
+          user_name: 'zhende1113'
+          user_email: 'zhende1113@example.com'
           keep_files: false
