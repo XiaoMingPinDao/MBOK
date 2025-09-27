@@ -147,8 +147,13 @@ install_system_dependencies() {
 install_mamba_environment() {
   print_title "安装和配置 Mamba 环境 (Mambaforge)"
   [[ -d "$HOME/mambaforge/envs/Eridanus" ]] && ok "检测到 Mamba 环境 'Eridanus' 已存在" && return
-  LATEST=$(curl -s "${GITHUB_PROXY}https://api.github.com/repos/conda-forge/miniforge/releases/latest" \
+  LATEST=$(curl -s "https://api.github.com/repos/conda-forge/miniforge/releases/latest" \
          | grep -oP '"tag_name":\s*"\K[^"]+')
+  if [[ -z "$LATEST" ]]; then
+    warn "未能获取最新 Mambaforge 版本号，使用固定版本"
+    LATEST=25.3.1-0
+  fi
+
   info "当前mamba版本号是 $LATEST"
 
   info "下载 Mambaforge 安装脚本..."
