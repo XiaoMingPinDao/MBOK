@@ -1,0 +1,43 @@
+/* 全局字体 */
+:root {
+  --vp-font-family-base: "Inter", "LXGW WenKai", system-ui, sans-serif;
+}
+
+/* 首页大标题渐变 */
+.vp-doc h1 {
+  background: linear-gradient(120deg, #4facfe, #00f2fe);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* 页脚样式 */
+.vp-footer {
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+
+/* 导航栏右上角 Logo 圆角矩形 */
+header img[src*="logo.png"] {
+  border-radius: 8px;   /* 圆角半径，可调 4~12px */
+  width: 40px !important;
+  height: 40px !important;
+  object-fit: cover;
+}
+
+/* 自定义 favicon 样式 - 这个主要影响页面内的 logo */
+.VPNavBarTitle .logo {
+  border-radius: 8px !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* 导航栏 logo 圆角 */
+.VPNavBar .logo img {
+  border-radius: 8px !important;
+  transition: transform 0.2s ease;
+}
+
+.VPNavBar .logo img:hover {
+  transform: scale(1.05);
+}
+
