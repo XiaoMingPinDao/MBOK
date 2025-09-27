@@ -6,31 +6,14 @@
 在国内服务器部署如果不能直连github用这个
 
 ```bash
-bash <(curl -sSL https://ghfast.top/https://github.com/Astriora/Antlia/raw/refs/heads/main/Script/AstrBot/Antlia.sh)
-```
-fish终端语法与bash zsh不同 要单独
-```fish
-bash (curl -sSL (https://ghfast.top/https://github.com/Astriora/Antlia/raw/refs/heads/main/Script/AstrBot/Antlia.sh)
+curl -sSL https://github.com/Astriora/Antlia/raw/refs/heads/main/Script/AstrBot/Antlia.sh | bash
 ```
 
-国外的就是这个
-
-```bash
-bash <(curl -sSL https://github.com/Astriora/Antlia/raw/refs/heads/main/Script/AstrBot/Antlia.sh)
-```
-
-fish终端语法与bash zsh不同 要单独
-```fish
-bash (curl -sSL https://github.com/Astriora/Antlia/raw/refs/heads/main/Script/AstrBot/Antlia.sh)
-```
-```bash
-bash <(curl -sSL https://github.com/Astriora/Antlia/raw/refs/heads/main/Script/UV/uv_install.sh)
-```
 
 ```bash
 
 
-bash <(curl -sSL https://github.com/Astriora/Antlia/raw/refs/heads/main/Script/NapCat/install.sh)
+curl -sSL https://github.com/Astriora/Antlia/raw/refs/heads/main/Script/NapCat/install.sh | bash
 ```
 
 
@@ -39,7 +22,7 @@ bash <(curl -sSL https://github.com/Astriora/Antlia/raw/refs/heads/main/Script/N
 ```bash
 
 
-bash <(curl -sSL https://ghfast.top/https://raw.githubusercontent.com/Astriora/Antlia/refs/heads/main/Script/Eridanus/Antlia.sh)
+curl -sSL https://ghfast.top/https://raw.githubusercontent.com/Astriora/Antlia/refs/heads/main/Script/Eridanus/Antlia.sh | bash
 ```
 
 
