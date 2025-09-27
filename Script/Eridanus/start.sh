@@ -223,6 +223,8 @@ lagrange_menu() {
 # =============================================================================
 
 main() {
+  export PATH="$HOME/.local/bin:$PATH"
+
   mkdir -p "$LOG_DIR"
   check_command tmux screen mamba pkill
   main_menu
