@@ -266,6 +266,7 @@ main() {
   install_mamba_environment
   clone_eridanus
   install_python_dependencies
+  cd $SCRIPT_DIR
   download_start_script
   print_title "🎉 部署完成! 🎉"
   echo "下一步: 请运行 './start.sh' 来启动和管理您的机器人服务。"
