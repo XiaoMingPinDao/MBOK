@@ -146,15 +146,7 @@ install_system_dependencies() {
 
 install_mamba_environment() {
   print_title "安装和配置 Mamba 环境 (Mambaforge)"
-  [[ -d "$HOME/mambaforge/envs/Eridanus" ]] && ok "检测到 Mamba 环境 'Eridanus' 已存在" && return
-  LATEST=$(curl -s "https://api.github.com/repos/conda-forge/miniforge/releases/latest" \
-         | grep -oP '"tag_name":\s*"\K[^"]+')
-  if [[ -z "$LATEST" ]]; then
-    warn "未能获取最新 Mambaforge 版本号，使用固定版本"
-    LATEST=25.3.1-0
-  fi
 
-  info "当前mamba版本号是 $LATEST"
 
   info "下载 Mambaforge 安装脚本..."
   local Micromamba_url="${GITHUB_PROXY}https://raw.githubusercontent.com/Astriora/Antlia/refs/heads/main/Script/Micromamba/Micromamba_install.sh"
@@ -163,14 +155,8 @@ install_mamba_environment() {
   bash Micromamba_install.sh --GITHUBPROXYURL="${GITHUB_PROXY}" --BIN_FOLDER="$HOME/bin" --INIT_YES=yes
   export PATH="$HOME/.local/bin:$PATH"
 
-  info "运行 Mambaforge 安装脚本..."
-  bash mambaforge.sh -b -p "$HOME/mambaforge" || err "Mambaforge 安装失败"
-  rm -f mambaforge.sh
-
-  info "初始化 Mamba..."
-  source "$HOME/mambaforge/etc/profile.d/conda.sh"
-  conda init --all || err "conda init 失败"
   source ~/.bashrc 2>/dev/null || true
+  export PATH="$HOME/.local/bin:$PATH"
   ok "Mamba 安装成功！"
 
   info "配置镜像源..."
