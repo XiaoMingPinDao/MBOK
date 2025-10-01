@@ -13,7 +13,7 @@ _轻量级 Shell 脚本项目，为个人使用体验优化，一站式部署与
 
 ---
 
-[![Release](https://img.shields.io/github/v/release/Astriora/Antlia)](https://github.com/Astriora/Antlia/releases)
+
 [![License](https://img.shields.io/github/license/Astriora/Antlia)](./LICENSE)
 
 
