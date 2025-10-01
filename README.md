@@ -1,6 +1,17 @@
+<!-- 顶部横屏 Logo 右侧显示 -->
+<img src="/plpl_cover_20250926062351.jpg" width="450" height="120" alt="Antlia" align="right" />
+
+<div align="center">
+
 # Antlia
 
-<img src="/plpl_cover_20250926062351.jpg" width="50%" alt="Antlia" align="right" />
+_轻量级 Shell 脚本项目，为个人使用体验优化，一站式部署与管理 AstrBot 及其他脚本_
+
+> 个性化、便捷、高效，让你的脚本运行更顺畅
+
+</div>
+
+---
 
 
 ## ❤️ Special Thanks
