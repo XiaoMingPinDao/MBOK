@@ -13,13 +13,15 @@ _轻量级 Shell 脚本项目，为个人使用体验优化，一站式部署与
 
 ---
 
+<!-- 顶部徽章 -->
 [![频道](https://img.shields.io/badge/Telegram-频道-blue)](https://t.me/Astriora_Official)
 [![群](https://img.shields.io/badge/Telegram-群-green)](https://t.me/AstrioraOfficialGroup)
 [![文档](https://img.shields.io/badge/Docs-文档-orange)](https://astriora.github.io/)
 [![License](https://img.shields.io/github/license/Astriora/Antlia)](./LICENSE)
 [![Stars](https://img.shields.io/github/stars/Astriora/Antlia?style=social)](https://github.com/Astriora/Antlia/stargazers)
 [![Forks](https://img.shields.io/github/forks/Astriora/Antlia?style=social)](https://github.com/Astriora/Antlia/network/members)
-[![Telegram](https://img.shields.io/badge/Telegram-join-blue)]
+[![Telegram](https://img.shields.io/badge/Telegram-联系-blueviolet)](https://t.me/Astriora_Official)
+
 
 
 ## ❤️ Special Thanks
