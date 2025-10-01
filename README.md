@@ -3,42 +3,19 @@
 
 ## 安装
 
-在国内服务器部署如果不能直连github用这个
-
-```bash
-curl -sSL https://github.com/Astriora/Antlia/raw/refs/heads/main/Script/AstrBot/Antlia.sh | bash
-```
 
 
-```bash
+## ⭐ Star History
 
+> [!TIP] 
+> 如果本项目对您的生活 / 工作产生了帮助，或者您关注本项目的未来发展，请给项目 Star，这是我维护这个开源项目的动力 <3
 
-curl -sSL https://github.com/Astriora/Antlia/raw/refs/heads/main/Script/NapCat/install.sh | bash
-```
+<div align="center">
 
+![Star History Chart](https://api.star-history.com/svg?repos=Astriora/Antlia&type=Date)
+</div>
 
-
-
-```bash
-
-
-curl -sSL https://ghfast.top/https://raw.githubusercontent.com/Astriora/Antlia/refs/heads/main/Script/Eridanus/Antlia.sh | bash
-```
-
-
-
-
-
-
-
-### 从会话分离
-
-- **tmux**：`Ctrl+b, d`
-
-### 关于
-
-有问题就去提交议题就行了 **部署**或者**启动**问题 带上 **Linux发行版** 和 **日志**
-
+</details>
 
 ## License
 
