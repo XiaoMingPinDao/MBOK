@@ -1,5 +1,5 @@
 <!-- 顶部横屏 Logo 右侧显示 -->
-<img src="/plpl_cover_20250926062351.jpg" width="450" height="120" alt="Antlia" align="right" />
+<img src="/plpl_cover_20250926062351.jpg" width="450" alt="Antlia" align="right" />
 
 <div align="center">
 
@@ -12,6 +12,7 @@ _轻量级 Shell 脚本项目，为个人使用体验优化，一站式部署与
 </div>
 
 ---
+
 
 
 ## ❤️ Special Thanks
