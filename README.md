@@ -17,7 +17,7 @@ _轻量级 Shell 脚本项目，为个人使用体验优化，一站式部署与
 
 ## ❤️ Special Thanks
 
-特别感谢所有 Contributors 和插件开发者对 Antlia 的贡献 ❤️
+特别感谢所有 Contributors 对 Antlia 的贡献 ❤️
 
 <div style="text-align:center;">
   <a href="https://github.com/Astriora/Antlia/graphs/contributors">
