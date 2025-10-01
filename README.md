@@ -7,19 +7,21 @@
 
 _轻量级 Shell 脚本项目，为个人使用体验优化，一站式部署与管理 AstrBot 及其他脚本_
 
-[> 个性化、便捷、高效，让你的脚本运行更顺畅](https://astriora.github.io/)
+> 个性化、便捷、高效，让你的脚本运行更顺畅 — [查看文档](https://astriora.github.io/)
 
 </div>
 
 ---
-
-
 [![License](https://img.shields.io/github/license/Astriora/Antlia)](./LICENSE)
+[![Stars](https://img.shields.io/github/stars/Astriora/Antlia?style=social)](https://github.com/Astriora/Antlia/stargazers)
+[![Forks](https://img.shields.io/github/forks/Astriora/Antlia?style=social)](https://github.com/Astriora/Antlia/network/members)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/Astriora/Antlia/ci.yml?branch=main)](https://github.com/Astriora/Antlia/actions)
 
 
 ## ❤️ Special Thanks
 
-特别感谢所有 Contributors 对 Antlia 的贡献 ❤️
+特别感谢所有 Contributors 对 Antlia 的贡献 ❤️  
+当然，也要感谢我自己默默维护这个项目的努力
 
 <div style="text-align:center;">
   <a href="https://github.com/Astriora/Antlia/graphs/contributors">
@@ -28,10 +30,9 @@ _轻量级 Shell 脚本项目，为个人使用体验优化，一站式部署与
 </div>
 
 
-## ⭐ Star History
+## ⭐ Star History 
+如果本项目对您的生活/工作产生帮助，请给项目一个 Star ❤️
 
-> [!TIP] 
-> 如果本项目对您的生活 / 工作产生了帮助，或者您关注本项目的未来发展，请给项目 Star，这是我维护这个开源项目的动力 <3
 
 <div align="center">
 
@@ -40,7 +41,8 @@ _轻量级 Shell 脚本项目，为个人使用体验优化，一站式部署与
 
 </details>
 
-## License
+## 📄 License
 
-This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
+本项目采用 Apache License 2.0 开源协议 - 详情见 [LICENSE](LICENSE)
+
 
