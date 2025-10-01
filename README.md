@@ -1,9 +1,6 @@
 # Antlia
 
 
-## 安装
-
-
 
 ## ⭐ Star History
 
