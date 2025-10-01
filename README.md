@@ -1,5 +1,14 @@
 # Antlia
 
+## ❤️ Special Thanks
+
+特别感谢所有 Contributors 和插件开发者对 Antlia 的贡献 ❤️
+
+<div style="text-align:center;">
+  <a href="https://github.com/Astriora/Antlia/graphs/contributors">
+    <img src="https://contrib.rocks/image?repo=Astriora/Antlia" />
+  </a>
+</div>
 
 
 ## ⭐ Star History
