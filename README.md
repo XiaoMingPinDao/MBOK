@@ -1,5 +1,8 @@
 # Antlia
 
+<img src="/plpl_cover_20250926062351.jpg" width="50%" alt="Antlia" align="right" />
+
+
 ## ❤️ Special Thanks
 
 特别感谢所有 Contributors 和插件开发者对 Antlia 的贡献 ❤️
