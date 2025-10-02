@@ -1,34 +1,23 @@
-<p align="center">
-  <img src="/plpl_cover_20250926062351.jpg" width="300" alt="Antlia Logo"/>
-</p>
+<!-- 顶部横屏 Logo 右侧显示 -->
+<img src="/plpl_cover_20250926062351.jpg" width="450" alt="Antlia" align="right" />
 
-<h1 align="center">Antlia</h1>
+<div align="center">
 
-<p align="center">
-  ✨ 轻量级 Shell 脚本项目，为个人使用体验优化<br>
-  🛠️ 一站式部署与管理 AstrBot 及其他脚本
-</p>
+# Antlia
 
-<p align="center">
-  <a href="https://astriora.github.io/">
-    <img src="https://img.shields.io/badge/📖_查看文档-orange" alt="Docs"/>
-  </a>
-</p>
+_轻量级 Shell 脚本项目，为个人使用体验优化，一站式部署与管理 AstrBot 及其他脚本_
+
+> 个性化、便捷、高效，让你的脚本运行更顺畅 — [查看文档](https://astriora.github.io/)
+
+</div>
 
 ---
 
-## 🚀 特性
-- ✅ 一键部署 AstrBot  
-- ⚡ 自动安装依赖，支持 Conda/Mamba  
-- 🐧 兼容 Arch / openSUSE / Debian / Ubuntu 等 Linux  
-- 🔄 提供服务管理脚本，支持 tmux/pm2  
-- 🔧 快速更新、备份与恢复  
-
----
-
+<!-- 顶部徽章 -->
 <p align="center">
   <a href="https://t.me/Astriora_Official"><img src="https://img.shields.io/badge/Telegram-频道-blue"></a>
   <a href="https://t.me/AstrioraOfficialGroup"><img src="https://img.shields.io/badge/Telegram-群-green"></a>
+  <a href="https://astriora.github.io/"><img src="https://img.shields.io/badge/Docs-文档-orange"></a>
   <a href="./LICENSE"><img src="https://img.shields.io/github/license/Astriora/Antlia"></a>
   <a href="https://github.com/Astriora/Antlia/stargazers"><img src="https://img.shields.io/github/stars/Astriora/Antlia?style=social"></a>
   <a href="https://github.com/Astriora/Antlia/network/members"><img src="https://img.shields.io/github/forks/Astriora/Antlia?style=social"></a>
@@ -37,6 +26,8 @@
 ---
 
 ## ❤️ Special Thanks
+感谢所有贡献者对 Antlia 的支持 ❤️  
+
 <p align="center">
   <a href="https://github.com/Astriora/Antlia/graphs/contributors">
     <img src="https://contrib.rocks/image?repo=Astriora/Antlia" />
