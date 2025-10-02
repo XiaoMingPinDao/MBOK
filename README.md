@@ -42,7 +42,7 @@ _轻量级 Shell 脚本项目，为个人使用体验优化，一站式部署与
 
 <div align="center">
 
-![Star History Chart](https://api.star-history.com/svg?repos=Astriora/Antlia&type=Date)
+![Star History Chart](https://api.star-history.com/svg?repos=Astiora/Antlia&type=Date)
 </div>
 
 </details>
