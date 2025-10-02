@@ -56,10 +56,7 @@ _轻量级 Shell 脚本项目，为个人使用体验优化，一站式部署与
 ---
 
 # Visitors
-![](https://count.getloli.com/get/@ColdWindScholar?theme=gelbooru)
+![](https://count.getloli.com/get/@Astriora?theme=gelbooru)
 
-
-
-本项目采用 Apache License 2.0 开源协议 - 详情见 [LICENSE](LICENSE)
 
 
