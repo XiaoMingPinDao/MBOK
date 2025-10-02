@@ -17,6 +17,15 @@
 
 ---
 
+## 🚀 特性
+- ✅ 一键部署 AstrBot  
+- ⚡ 自动安装依赖，支持 Conda/Mamba  
+- 🐧 兼容 Arch / openSUSE / Debian / Ubuntu 等 Linux  
+- 🔄 提供服务管理脚本，支持 tmux/pm2  
+- 🔧 快速更新、备份与恢复  
+
+---
+
 <p align="center">
   <a href="https://t.me/Astriora_Official"><img src="https://img.shields.io/badge/Telegram-频道-blue"></a>
   <a href="https://t.me/AstrioraOfficialGroup"><img src="https://img.shields.io/badge/Telegram-群-green"></a>
