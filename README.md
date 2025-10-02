@@ -7,7 +7,7 @@
 
 _轻量级 Shell 脚本项目，为个人使用体验优化，一站式部署与管理 AstrBot 及其他项目_
 
-> 个性化、便捷、高效，让你的脚本运行更顺畅 — [查看文档](https://astriora.github.io/)
+快速部署、轻松管理脚本 — [查看文档](https://astriora.github.io/)
 
 </div>
 
@@ -71,7 +71,7 @@ _轻量级 Shell 脚本项目，为个人使用体验优化，一站式部署与
 ---
 
 # Visitors
-![](https://count.getloli.com/get/@Astriora?theme=gelbooru)
-
+![](https://count.getloli.com/get/@Astriora?theme=gelbooru)  
+動け、スクリプトよ。
 
 
