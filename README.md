@@ -1,5 +1,5 @@
 <!-- 顶部横屏 Logo 右侧显示 -->
-<img src="/plpl_cover_20250926062351.jpg" width="450" alt="Antlia" align="right" />
+<img src="/Astriora.jpg" width="450" alt="Antlia" align="right" />
 
 <div align="center">
 
