@@ -34,9 +34,9 @@ _轻量级 Shell 脚本项目，为个人使用体验优化，一站式部署与
     <img src="https://contrib.rocks/image?repo=Astriora/Antlia" />
   </a>
 </div>
-<p align="center">
+
   想参与贡献？欢迎在 GitHub 提交 Issues 或 Pull Requests！
-</p>
+
 
 ## ⭐ Star History 
 如果本项目对您的生活/工作产生帮助，请给项目一个 Star ❤️
