@@ -20,11 +20,7 @@ _Shell 脚本，一键部署。実行せよ。_
 [![License](https://img.shields.io/github/license/Astriora/Antlia)](./LICENSE)
 [![Stars](https://img.shields.io/github/stars/Astriora/Antlia?style=social)](https://github.com/Astriora/Antlia/stargazers)
 [![Forks](https://img.shields.io/github/forks/Astriora/Antlia?style=social)](https://github.com/Astriora/Antlia/network/members)
-<a href="https://qun.qq.com/universal-share/share?ac=1&authKey=KCqa%2FEwM6f9XEu4UZccskceujZl92%2F03rR6bogJ6v2SMn2bf4Z9fLm5cYELCDv%2F0&busi_data=eyJncm91cENvZGUiOiIxMDQ2NzU1NjI1IiwidG9rZW4iOiJwaFEyeWlHY25PNTV2aVJzS0ZoUnBBbjd6ais2Ujk2Z1V5K2ptcGlDanprSEZFQVdUK3JDUWhPeGNqSk4rd2lPIiwidWluIjoiMzk2MjM1ODQzOCJ9&data=OX1PrlVithbXbWGjWkO7E_KMp04OhxknDqUf-uGqUCPyonLjZynWvtwGoPnPQF7Fi7PdIGuYzvDqhuoYMPhBpg&svctype=4&tempid=h5_group_info" 
-   target="_blank" 
-   style="display:inline-block; padding:6px 12px; font-size:14px; font-weight:500; color:#fff; background-color:#12b7f5; border-radius:12px; text-decoration:none;">
-  加入群聊【Astriora】
-</a>
+[![加入群聊【Astriora】](https://img.shields.io/badge/QQ群-加入群聊-12B7F5?style=flat-square&logo=qq&logoColor=white)](https://qun.qq.com/universal-share/share?ac=1&authKey=KCqa%2FEwM6f9XEu4UZccskceujZl92%2F03rR6bogJ6v2SMn2bf4Z9fLm5cYELCDv%2F0&busi_data=eyJncm91cENvZGUiOiIxMDQ2NzU1NjI1IiwidG9rZW4iOiJwaFEyeWlHY25PNTV2aVJzS0ZoUnBBbjd6ais2Ujk2Z1V5K2ptcGlDanprSEZFQVdUK3JDUWhPeGNqSk4rd2lPIiwidWluIjoiMzk2MjM1ODQzOCJ9&data=OX1PrlVithbXbWGjWkO7E_KMp04OhxknDqUf-uGqUCPyonLjZynWvtwGoPnPQF7Fi7PdIGuYzvDqhuoYMPhBpg&svctype=4&tempid=h5_group_info)
 ## 🛠️ 项目贡献
 
 欢迎提交你的脚本或改进给 Antlia！
