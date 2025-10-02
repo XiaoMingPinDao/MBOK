@@ -13,35 +13,39 @@ _轻量级 Shell 脚本项目，为个人使用体验优化，一站式部署与
 
 ---
 
-<!-- 顶部徽章 -->
+<!-- 徽章区：紧凑排列 -->
 <p align="center">
-  <a href="https://t.me/Astriora_Official"><img src="https://img.shields.io/badge/Telegram-频道-blue"></a>
-  <a href="https://t.me/AstrioraOfficialGroup"><img src="https://img.shields.io/badge/Telegram-群-green"></a>
-  <a href="https://astriora.github.io/"><img src="https://img.shields.io/badge/Docs-文档-orange"></a>
-  <a href="./LICENSE"><img src="https://img.shields.io/github/license/Astriora/Antlia"></a>
-  <a href="https://github.com/Astriora/Antlia/stargazers"><img src="https://img.shields.io/github/stars/Astriora/Antlia?style=social"></a>
-  <a href="https://github.com/Astriora/Antlia/network/members"><img src="https://img.shields.io/github/forks/Astriora/Antlia?style=social"></a>
+  <a href="https://t.me/Astriora_Official"><img src="https://img.shields.io/badge/Telegram-频道-blue&logo=telegram" alt="Telegram 频道"></a>
+  <a href="https://t.me/AstrioraOfficialGroup"><img src="https://img.shields.io/badge/Telegram-群-green&logo=telegram" alt="Telegram 群"></a>
+  <a href="https://astriora.github.io/"><img src="https://img.shields.io/badge/📖_文档-orange" alt="Docs"></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-lightgrey" alt="License"></a>
+  <a href="https://github.com/Astriora/Antlia/stargazers"><img src="https://img.shields.io/github/stars/Astriora/Antlia?style=social" alt="Stars"></a>
+  <a href="https://github.com/Astriora/Antlia/network/members"><img src="https://img.shields.io/github/forks/Astriora/Antlia?style=social" alt="Forks"></a>
 </p>
 
 ---
 
 ## ❤️ Special Thanks
-感谢所有贡献者对 Antlia 的支持 ❤️  
-
 <p align="center">
-  <a href="https://github.com/Astriora/Antlia/graphs/contributors">
-    <img src="https://contrib.rocks/image?repo=Astriora/Antlia" />
-  </a>
+  感谢所有 Contributors 对 Antlia 的贡献 ❤️
 </p>
+
+<div align="center">
+  <a href="https://github.com/Astriora/Antlia/graphs/contributors">
+    <img src="https://contrib.rocks/image?repo=Astriora/Antlia" alt="Contributors"/>
+  </a>
+</div>
 
 ---
 
 ## 📊 Star History
 <p align="center">
-  <img src="https://api.star-history.com/svg?repos=Astriora/Antlia&type=Date" alt="Star History Chart"/>
+  <img src="https://api.star-history.com/svg?repos=Astriora/Antlia&type=Date" alt="Star History"/>
 </p>
 
 ---
 
 ## 📄 License
-本项目采用 Apache License 2.0 协议 - 详情见 [LICENSE](LICENSE)
+<p align="center">
+  本项目采用 Apache License 2.0 协议 - 详情见 <a href="LICENSE">LICENSE</a>
+</p>
