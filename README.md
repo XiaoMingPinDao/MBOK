@@ -72,9 +72,6 @@ _Shell 脚本，一键部署。実行せよ。_
 
 # Visitors
 ![](https://count.getloli.com/get/@Astriora?theme=gelbooru)  
-<div align="center">
-
 ⚡ **実行せよ。** ⚡
 
-</div>
 
