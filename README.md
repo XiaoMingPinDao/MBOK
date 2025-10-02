@@ -20,7 +20,7 @@ _轻量级 Shell 脚本项目，为个人使用体验优化，一站式部署与
 [![License](https://img.shields.io/github/license/Astriora/Antlia)](./LICENSE)
 [![Stars](https://img.shields.io/github/stars/Astriora/Antlia?style=social)](https://github.com/Astriora/Antlia/stargazers)
 [![Forks](https://img.shields.io/github/forks/Astriora/Antlia?style=social)](https://github.com/Astriora/Antlia/network/members)
-[![Telegram](https://img.shields.io/badge/Telegram-联系-blueviolet)](https://t.me/Astriora_Official)
+
 
 
 
