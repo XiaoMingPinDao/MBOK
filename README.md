@@ -21,6 +21,21 @@ _轻量级 Shell 脚本项目，为个人使用体验优化，一站式部署与
 [![Stars](https://img.shields.io/github/stars/Astriora/Antlia?style=social)](https://github.com/Astriora/Antlia/stargazers)
 [![Forks](https://img.shields.io/github/forks/Astriora/Antlia?style=social)](https://github.com/Astriora/Antlia/network/members)
 
+## 🛠️ 项目贡献
+
+欢迎提交你的脚本或改进给 Antlia！
+
+**贡献流程：**
+1. **语法检查**：我会先用 `bash -n` 或 `shellcheck` 检查语法，确保脚本能正确解析。  
+2. **静态审查**：人工查看混淆或隐藏逻辑，例如 `eval`、`base64`、`perl -e` 等，确保没有恶意代码。  
+3. **安全测试**：在隔离环境中测试潜在风险命令，确保不会修改系统或泄露敏感信息。  
+
+**贡献者互动**：
+- 如果你对某段代码不确定，或者发现问题，可以直接在 GitHub **提交 Issue** 或 **PR 评论**，我会与你讨论改进方案。  
+- 提交的脚本或改动，如果需要修改，我会给出明确建议，然后你更新后再次提交。  
+- 只有通过上述流程审核的脚本，才会被正式纳入项目文档或发布。  
+
+**原则：**安全第一，合作共赢，个性化贡献完全可行
 
 
 
