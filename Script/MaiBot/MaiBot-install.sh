@@ -329,6 +329,7 @@ install_python_dependencies() {
     # 激活虚拟环境
     
     cd "$DEPLOY_DIR/MaiBot" || exit 1
+    ls -l
     # 安装 uv 依赖
     export UV_INDEX_URL="https://mirrors.ustc.edu.cn/pypi/simple/"
     mkdir -p ~/.cache/uv
