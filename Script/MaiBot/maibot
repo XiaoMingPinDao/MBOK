@@ -64,9 +64,10 @@ init_paths() {
 # 工具函数
 # =============================================================================
 session_exists() {
-    screen -ls | grep -q "\.$1\s"
+    screen -ls | grep -q "\.$1[[:space:]]"
     return $?
 }
+
 
 check_service_status() {
     local service=$1
@@ -118,7 +119,7 @@ start_adapter() {
     
     cd "$ADAPTER_DIR" || { error "无法进入目录 $ADAPTER_DIR"; return 1; }
     
-    screen -dmS MaiBot-Napcat-Adapter bash -c "cd '$ADAPTER_DIR' && source '$ADAPTER_DIR/.MaiBot-Napcat-Adapter/bin/activate' && python main.py"
+    screen -dmS MaiBot-Napcat-Adapter bash -c "cd '$ADAPTER_DIR' && source '$ADAPTER_DIR/.MaiBot-Napcat-Adapter/bin/activate' && uv python3 main.py"
 
     
     sleep 2
@@ -140,7 +141,7 @@ stop_maibot() {
         return 1
     fi
     
-    screen -S MaiBot -X quit 2>&1 | tee -a "$LOG_FILE"
+    screen -S MaiBot -X quit
     sleep 1
     
     if ! session_exists "MaiBot"; then
@@ -160,7 +161,7 @@ stop_adapter() {
         return 1
     fi
     
-    screen -S MaiBot-Napcat-Adapter -X quit 2>&1 | tee -a "$LOG_FILE"
+    screen -S MaiBot-Napcat-Adapter -X quit 
     sleep 1
     
     if ! session_exists "MaiBot-Napcat-Adapter"; then
@@ -224,7 +225,7 @@ attach_session() {
 # =============================================================================
 show_menu() {
     clear
-    print_title "MaiBot 管理脚本 v2025.10.03"
+    print_title "MaiBot  2025.10.03"
     
     echo -e "${CYAN}系统信息:${RESET}"
     echo -e "  用户: ${GREEN}$CURRENT_USER${RESET}"
@@ -250,11 +251,14 @@ show_menu() {
     echo -e "  ${BOLD}${GREEN}[5]${RESET} 附加到 MaiBot 会话"
     echo -e "  ${BOLD}${GREEN}[6]${RESET} 附加到 MaiBot-Napcat-Adapter 会话"
     echo ""
+    echo -e "  ${BOLD}${GREEN}[7]${RESET} 前台启动 MaiBot "
+    echo -e "  ${BOLD}${GREEN}[8]${RESET} 前台启动 MaiBot-Napcat-Adapter "
+    echo ""
     echo -e "  ${BOLD}${GREEN}[0]${RESET} 退出脚本"
     
     print_line
     echo ""
-    echo -ne "${BOLD}${YELLOW}请选择操作 [0-6]: ${RESET}"
+    echo -ne "${BOLD}${YELLOW}请选择操作 [0-8]: ${RESET}"
 }
 
 # =============================================================================
@@ -315,7 +319,30 @@ main() {
                 ;;
             5) attach_session "MaiBot" "MaiBot" ;;
             6) attach_session "MaiBot-Napcat-Adapter" "MaiBot-Napcat-Adapter" ;;
-            114514) echo "兄弟兄弟能不能给我的项目点一个star https://github.com/Astriora/Antlia 我可以给你发腿照" ;;
+            7) 
+                print_title "前台启动 MaiBot"
+                # 如果已运行先停止
+                if session_exists "MaiBot"; then
+                    stop_maibot
+                fi
+                cd "$DEPLOY_DIR" || { error "无法进入目录 $DEPLOY_DIR"; press_any_key; continue; }
+                echo -e "${GREEN}前台启动 MaiBot,使用 Ctrl+C 停止${RESET}"
+                uv run bot.py
+                press_any_key
+                ;;
+            8) 
+                print_title "前台启动 MaiBot-Napcat-Adapter"
+                # 如果已运行先停止
+                if session_exists "MaiBot-Napcat-Adapter"; then
+                    stop_adapter
+                fi
+                cd "$ADAPTER_DIR" || { error "无法进入目录 $ADAPTER_DIR"; press_any_key; continue; }
+                source "$ADAPTER_DIR/.MaiBot-Napcat-Adapter/bin/activate"
+                echo -e "${GREEN}前台启动 MaiBot-Napcat-Adapter,使用 Ctrl+C 停止${RESET}"
+                uv python3 main.py
+                press_any_key
+                ;;
+            114514) echo "兄弟兄弟能不能给我的项目点一个star https://github.com/Astriora/Antlia 我可以给你发腿照" && press_any_key  ;;
             0)
                 exit 0
                 ;;

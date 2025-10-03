@@ -388,7 +388,7 @@ install_python_dependencies() {
     source "$VENV_DIR/bin/activate"
     # 安装 Napcat Adapter 依赖
     cd "$DEPLOY_DIR/MaiBot-Napcat-Adapter"
-    pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+    uv pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
     ok "Python 依赖已安装"
 
     # 复制配置文件
