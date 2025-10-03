@@ -250,6 +250,44 @@ install_system_dependencies() {   #定义函数
         packages+=("uv")
         info "已将 uv 添加到 Arch 的必需安装包列表"
     fi
+        if ! command_exists pip3 && ! command_exists pip; then   #如果 pip3 和 pip 都不存在
+        case $PKG_MANAGER in                                 #根据包管理器选择 pip 包名称
+            apt) packages+=("python3-pip") ;;                # apt
+            pacman) packages+=("python-pip") ;;              # pacman
+            dnf|yum) packages+=("python3-pip") ;;            # dnf 和 yum
+            zypper) packages+=("python3-pip") ;;             # zypper
+            apk) packages+=("py3-pip") ;;                    # apk
+            brew) packages+=("pip3") ;;                      # brew
+            *) packages+=("python3-pip") ;;                  #默认
+        esac                                                 #结束条件判断
+    fi
+    # 检查 gcc/g++ 是否存在，如果都不存在则安装
+    if ! command_exists gcc || ! command_exists g++; then
+     case $PKG_MANAGER in
+        apt)
+            packages+=("build-essential")      # 包含 gcc g++ make 等
+            ;;
+        pacman)
+            packages+=("base-devel")           # Arch 基础开发包，包含 gcc g++
+            ;;
+        dnf|yum)
+            packages+=("gcc" "gcc-c++" "make")
+            ;;
+        zypper)
+            packages+=("gcc" "gcc-c++" "make")
+            ;;
+        apk)
+            packages+=("build-base")           # Alpine 包含 gcc g++ make
+            ;;
+        brew)
+            packages+=("gcc")
+            ;;
+        *)
+            echo "未知包管理器，请手动安装 gcc/g++"
+            ;;
+      esac
+    fi
+
 
     info "安装必需的系统包..."                                 #打印信息日志
     for package in "${packages[@]}"; do                     #循环遍历包数组
