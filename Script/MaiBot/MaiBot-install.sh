@@ -327,8 +327,8 @@ install_python_dependencies() {
     fi
 
     # 激活虚拟环境
-    source "$VENV_DIR/bin/activate"
-
+    
+    cd "$DEPLOY_DIR" || exit 1
     # 安装 uv 依赖
     export UV_INDEX_URL="https://mirrors.ustc.edu.cn/pypi/simple/"
     mkdir -p ~/.cache/uv
@@ -346,7 +346,7 @@ install_python_dependencies() {
         fi
     done
     [[ $attempt -gt 3 ]] && err "uv sync 多次失败"
-
+    source "$VENV_DIR/bin/activate"
     # 安装 Napcat Adapter 依赖
     cd "$DEPLOY_DIR/MaiBot-Napcat-Adapter"
     pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
