@@ -385,10 +385,10 @@ install_python_dependencies() {
         fi
     done
     [[ $attempt -gt 3 ]] && err "uv sync 多次失败"
-    mkdir -p config
-    cp template/bot_config_template.toml config/bot_config.toml
-    cp template/template.env .env
-    cp template/template_config.toml config.toml
+    mkdir -p "$SCRIPT_DIR/MaiBot/config"
+    cp "$SCRIPT_DIR/MaiBot/template/bot_config_template.toml" "$DEPLOY_DIR/MaiBot/config/bot_config.toml"
+    cp "$SCRIPT_DIR/MaiBot/template/template.env" "$DEPLOY_DIR/MaiBot/.env"
+    cp "$SCRIPT_DIR/MaiBot/template/template_config.toml" "$DEPLOY_DIR/MaiBot/config/bot_config.toml"
     source "$VENV_DIR/bin/activate"
     # 安装 Napcat Adapter 依赖
     cd "$DEPLOY_DIR/MaiBot-Napcat-Adapter"
