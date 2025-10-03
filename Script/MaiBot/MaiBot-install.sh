@@ -385,18 +385,17 @@ install_python_dependencies() {
         fi
     done
     [[ $attempt -gt 3 ]] && err "uv sync 多次失败"
+    mkdir -p config
+    cp template/bot_config_template.toml config/bot_config.toml
+    cp template/template.env .env
+    cp template/template_config.toml config.toml
     source "$VENV_DIR/bin/activate"
     # 安装 Napcat Adapter 依赖
     cd "$DEPLOY_DIR/MaiBot-Napcat-Adapter"
     uv pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
     ok "Python 依赖已安装"
-
-    # 复制配置文件
-    mkdir -p config
-    cp template/bot_config_template.toml config/bot_config.toml
-    cp template/template.env .env
+    # 复制并重命名文件
     cp template/template_config.toml config.toml
-
     deactivate
 }
 
