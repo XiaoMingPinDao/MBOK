@@ -385,17 +385,46 @@ install_python_dependencies() {
         fi
     done
     [[ $attempt -gt 3 ]] && err "uv sync 多次失败"
-    mkdir -p "$SCRIPT_DIR/MaiBot/config"
-    cp "$SCRIPT_DIR/MaiBot/template/bot_config_template.toml" "$DEPLOY_DIR/MaiBot/config/bot_config.toml"
-    cp "$SCRIPT_DIR/MaiBot/template/template.env" "$DEPLOY_DIR/MaiBot/.env"
-    cp "$SCRIPT_DIR/MaiBot/template/template_config.toml" "$DEPLOY_DIR/MaiBot/config/bot_config.toml"
+    info "配置 MaiBot..."
+    cd "$DEPLOY_DIR/MaiBot" || err "无法进入 MaiBot 目录"
+    
+    # 创建 config 文件夹
+    mkdir -p config
+    ok "已创建 config 文件夹"
+    
+    # 复制配置文件 (按照官方文档)
+    if [[ -f "template/bot_config_template.toml" ]]; then
+        cp "template/bot_config_template.toml" "config/bot_config.toml"
+        ok "已复制 bot_config.toml"
+    else
+        warn "未找到 template/bot_config_template.toml"
+    fi
+    
+    if [[ -f "template/model_config_template.toml" ]]; then
+        cp "template/model_config_template.toml" "config/model_config.toml"
+        ok "已复制 model_config.toml"
+    else
+        warn "未找到 template/model_config_template.toml"
+    fi
+    
+    if [[ -f "template/template.env" ]]; then
+        cp "template/template.env" ".env"
+        ok "已复制 .env"
     source "$VENV_DIR/bin/activate"
     # 安装 Napcat Adapter 依赖
     cd "$DEPLOY_DIR/MaiBot-Napcat-Adapter"
     uv pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
     ok "Python 依赖已安装"
-    # 复制并重命名文件
-    cp template/template_config.toml config.toml
+
+    # 复制配置文件
+    if [[ -f "template/template_config.toml" ]]; then
+        cp "template/template_config.toml" "config.toml"
+        ok "已复制 Adapter config.toml"
+    else
+        warn "未找到 template/template_config.toml"
+    fi
+    
+    ok "Python 依赖安装完成"
     deactivate
 }
 
