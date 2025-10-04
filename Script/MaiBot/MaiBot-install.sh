@@ -423,7 +423,7 @@ install_python_dependencies() {
 
     # 安装 Napcat Adapter 依赖
     cd "$DEPLOY_DIR/MaiBot-Napcat-Adapter" || err "无法进入 Adapter 目录"
-    uv venv
+    uv venv .venv
     source .venv/bin/activate
     info "安装 Napcat Adapter 依赖..."
     uv pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
