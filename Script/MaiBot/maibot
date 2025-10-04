@@ -119,7 +119,7 @@ start_adapter() {
     
     cd "$ADAPTER_DIR" || { error "无法进入目录 $ADAPTER_DIR"; return 1; }
     
-    screen -dmS MaiBot-Napcat-Adapter bash -c "cd '$ADAPTER_DIR' && source '$ADAPTER_DIR/.MaiBot-Napcat-Adapter/bin/activate' && uv run main.py"
+    screen -dmS MaiBot-Napcat-Adapter bash -c "cd '$ADAPTER_DIR' && uv run main.py"
 
     
     sleep 2
