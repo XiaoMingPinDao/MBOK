@@ -368,18 +368,6 @@ clone_maibot() {
 install_python_dependencies() {
     print_title "安装 Python 依赖"
 
-    VENV_DIR="$DEPLOY_DIR/MaiBot-Napcat-Adapter/.MaiBot-Napcat-Adapter"
-
-    # 创建虚拟环境
-    if [[ ! -d "$VENV_DIR" ]]; then
-        uv venv "$VENV_DIR"
-        ok "uv 虚拟环境创建完成: $VENV_DIR"
-    else
-        warn "检测到已有虚拟环境,跳过创建"
-    fi
-
-    # 激活虚拟环境
-    source "$VENV_DIR/bin/activate"
     
     # 配置 uv 镜像源
     export UV_INDEX_URL="https://mirrors.ustc.edu.cn/pypi/simple/"
