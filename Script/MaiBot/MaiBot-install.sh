@@ -201,16 +201,30 @@ install_package() { #定义函数
     info "安装 $package..."                  #打印信息日志
     case $PKG_MANAGER in                   #根据包管理器选择安装命令
         pacman)
-            $SUDO pacman -Sy --noconfirm "$package" #安装包
+            $SUDO pacman -S --noconfirm "$package" #安装包
             ;;
         apt)
             $SUDO apt update -qq 2>/dev/null || true #更新包列表
             $SUDO apt install -y "$package"          #安装包
             ;;
         dnf)
+            # 如果是安装 screen，先确保 EPEL 已启用
+            if [[ "$package" == "screen" ]]; then
+                if ! dnf repolist enabled | grep -q epel; then
+                    info "启用 EPEL 仓库以安装 screen..."
+                    $SUDO dnf install -y epel-release 2>/dev/null || true
+                fi
+            fi
             $SUDO dnf install -y "$package"   #安装包
             ;;
         yum)
+            # 如果是安装 screen，先确保 EPEL 已启用
+            if [[ "$package" == "screen" ]]; then
+                if ! yum repolist enabled | grep -q epel; then
+                    info "启用 EPEL 仓库以安装 screen..."
+                    $SUDO yum install -y epel-release 2>/dev/null || true
+                fi
+            fi
             $SUDO yum install -y "$package"  #安装包
             ;;
         zypper)
