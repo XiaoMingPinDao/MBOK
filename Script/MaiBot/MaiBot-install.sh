@@ -439,8 +439,8 @@ install_python_dependencies() {
 }
 
 update_shell_config() {
-    local path_export='export PATH="$HOME/.local/bin:$PATH"'
-    local fish_path_set='set -gx PATH "$HOME/.local/bin" $PATH'
+    local path_export='export PATH="$HOME/.local/bin/maibot:$PATH"'
+    local fish_path_set='set -gx PATH "$HOME/.local/bin/maibot" $PATH'
 
     [[ -f "$HOME/.bashrc" ]] && grep -qF "$path_export" "$HOME/.bashrc" || echo "$path_export" >> "$HOME/.bashrc"
     [[ -f "$HOME/.zshrc" ]] && grep -qF "$path_export" "$HOME/.zshrc" || echo "$path_export" >> "$HOME/.zshrc"
