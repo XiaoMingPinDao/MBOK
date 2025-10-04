@@ -349,6 +349,7 @@ clone_maibot() {
     fi # 如果目录不存在则继续克隆
      git clone --depth 1 "$CLONE_URL1" # 克隆仓库
 }  # 克隆 仓库结束
+
 # 安装 Python 依赖
 install_python_dependencies() {
     print_title "安装 Python 依赖"
@@ -386,7 +387,10 @@ install_python_dependencies() {
             sleep 5
         fi
     done
-    [[ $attempt -gt 3 ]] && err "uv sync 多次失败"
+    
+    if [[ $attempt -gt 3 ]]; then
+        err "uv sync 多次失败"
+    fi
 
     # 配置 MaiBot
     info "配置 MaiBot..."
