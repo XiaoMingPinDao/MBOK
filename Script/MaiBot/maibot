@@ -119,7 +119,7 @@ start_adapter() {
     
     cd "$ADAPTER_DIR" || { error "无法进入目录 $ADAPTER_DIR"; return 1; }
     
-    screen -dmS MaiBot-Napcat-Adapter bash -c "cd '$ADAPTER_DIR' && source '$ADAPTER_DIR/.MaiBot-Napcat-Adapter/bin/activate' && uv python3 main.py"
+    screen -dmS MaiBot-Napcat-Adapter bash -c "cd '$ADAPTER_DIR' && source '$ADAPTER_DIR/.MaiBot-Napcat-Adapter/bin/activate' && uv python main.py"
 
     
     sleep 2
@@ -339,7 +339,7 @@ main() {
                 cd "$ADAPTER_DIR" || { error "无法进入目录 $ADAPTER_DIR"; press_any_key; continue; }
                 source "$ADAPTER_DIR/.MaiBot-Napcat-Adapter/bin/activate"
                 echo -e "${GREEN}前台启动 MaiBot-Napcat-Adapter,使用 Ctrl+C 停止${RESET}"
-                uv python3 main.py
+                uv python main.py
                 press_any_key
                 ;;
             114514) echo "兄弟兄弟能不能给我的项目点一个star https://github.com/Astriora/Antlia 我可以给你发腿照" && press_any_key  ;;
