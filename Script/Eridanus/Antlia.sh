@@ -147,7 +147,7 @@ install_system_dependencies() {
 install_mamba_environment() {
   print_title "安装和配置 Mamba 环境 (Micromamba)"
 
-  # 检查是否已安装
+  # 检查是否已安装 Micromamba
   if command -v micromamba &>/dev/null; then
     ok "检测到 micromamba 已安装: $(command -v micromamba)"
   else
@@ -158,23 +158,33 @@ install_mamba_environment() {
     bash Micromamba_install.sh --GITHUBPROXYURL="${GITHUB_PROXY}" --BIN_FOLDER="$HOME/bin" --INIT_YES=yes
   fi
 
-  # 加入 PATH 并初始化 shell hook
+  # 初始化 shell hook 并加入 PATH
   export PATH="$HOME/bin:$PATH"
-  eval "$($HOME/bin/micromamba shell hook -s bash)"
+  eval "$($HOME/bin/micromamba shell hook -s bash || true)"
 
-  ok "Micromamba 安装成功！"
+  ok "Micromamba 安装完成"
 
-  info "配置镜像源..."
+  # 配置镜像源（清华镜像）
+  info "配置清华镜像源..."
   micromamba config prepend channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/
   micromamba config prepend channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/
 
+  # 创建 Python 3.11 虚拟环境 (Eridanus)
   info "创建 Python 3.11 虚拟环境 (Eridanus)..."
-  micromamba create -n Eridanus python=3.11 -c https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/ --override-channels -y || err "虚拟环境创建失败"
+  micromamba create -n Eridanus python=3.11 \
+    -c https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/ \
+    -c https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/ \
+    --override-channels -y || err "虚拟环境创建失败"
 
+  # 安装 pycairo 依赖
   info "安装图形库依赖 pycairo..."
-  micromamba run -n Eridanus micromamba install pycairo  -c https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/ --override-channels -y || warn "pycairo 安装失败，可能需要手动安装"
+  micromamba run -n Eridanus micromamba install pycairo \
+    -c https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/ \
+    -c https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/ \
+    --override-channels -y || warn "pycairo 安装失败，可能需要手动安装"
 
-  ok "Micromamba 环境配置完成"
+  ok "Micromamba 环境配置完成 ✅"
+  info "激活环境: micromamba activate Eridanus"
 }
 
 
