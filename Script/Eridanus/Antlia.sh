@@ -254,9 +254,9 @@ install_lagrange() {
 
 download_start_script() {
   local start_script_url="${GITHUB_PROXY}https://raw.githubusercontent.com/Astriora/Antlia/refs/heads/main/Script/Eridanus/start.sh"
-  download_with_retry "$start_script_url" "start.sh"
-  chmod +x start.sh
-  ok "start.sh 下载并设置可执行权限完成"
+  download_with_retry "$start_script_url" "eridanus.sh"
+  chmod +x eridanus.sh
+  ok "eridanus.sh 下载并设置可执行权限完成"
 }
 
 # =============================================================================
@@ -279,7 +279,8 @@ main() {
   cd $SCRIPT_DIR
   download_start_script
   print_title "🎉 部署完成! 🎉"
-  echo "下一步: 请运行 './start.sh' 来启动和管理您的机器人服务。"
+  echo "下一步: 请运行 './eridanus.sh' 来启动和管理您的机器人服务。"
 }
 
 main
+
