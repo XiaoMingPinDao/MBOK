@@ -78,9 +78,9 @@ RELEASE_URL="${GITHUB_PROXY}https://github.com/mamba-org/micromamba-releases/rel
 # ----------------------
 mkdir -p "$BIN_FOLDER"
 if hash curl >/dev/null 2>&1; then
-  curl -fsSL "$RELEASE_URL" -o "$BIN_FOLDER/micromamba"
+  curl -# -fSL "$RELEASE_URL" -o "$BIN_FOLDER/micromamba"
 elif hash wget >/dev/null 2>&1; then
-  wget -qO "$BIN_FOLDER/micromamba" "$RELEASE_URL"
+  wget --progress=bar:force:noscroll -O "$BIN_FOLDER/micromamba" "$RELEASE_URL"
 else
   echo "Neither curl nor wget was found" >&2
   exit 1
@@ -104,4 +104,4 @@ if [ "$CONDA_FORGE_YES" = "yes" ]; then
   "$BIN_FOLDER/micromamba" config set channel_priority strict
 fi
 
-echo "Micromamba 安装完成 ✅"
+echo "Micromamba 安装完成 "
