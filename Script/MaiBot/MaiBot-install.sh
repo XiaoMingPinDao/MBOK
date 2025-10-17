@@ -275,6 +275,18 @@ install_system_dependencies() {   #定义函数
             *) packages+=("python3-pip") ;;                  #默认
         esac                                                 #结束条件判断
     fi
+    # 检查 Python 开发包
+    if ! command_exists python3-config; then
+        case $PKG_MANAGER in
+            apt) packages+=("python3-dev") ;;
+            pacman) packages+=("python") ;;
+            dnf|yum) packages+=("python3-devel") ;;
+            zypper) packages+=("python3-devel") ;;
+            apk) packages+=("python3-dev") ;;
+            brew) ;; 
+            *) packages+=("python3-dev") ;;
+        esac
+    fi
     # 检查 gcc/g++ 是否存在，如果都不存在则安装
     if ! command_exists gcc || ! command_exists g++; then
      case $PKG_MANAGER in
