@@ -8,7 +8,7 @@ set -o pipefail #启用管道失败检测
 setup_uv_environment() {
     # 确保 uv 在 PATH 中
     export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
-    
+
     # 检查 uv 是否可用
     if ! command -v uv >/dev/null 2>&1; then
         err "uv 未找到，请检查安装或重新运行部署脚本"
@@ -22,26 +22,24 @@ setup_uv_environment() {
 # =============================================================================
 # 路径与常量定义
 # =============================================================================
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"  #获取脚本所在目录
-DEPLOY_DIR="$SCRIPT_DIR"                                    #部署目录这里偷了一个懒 不想改太多东西
-CONDA_DIR="$HOME/miniconda3"                                #Conda 安装目录如果你部署的时候选的其他环境不管
-DEPLOY_STATUS_FILE="$DEPLOY_DIR/deploy.status"              #部署状态文件路径
-TMUX_SESSION_ASTRBOT="Astrbot"                              #tmux 会话名称
-CURRENT_USER=$(whoami)                                      #当前用户
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)" #获取脚本所在目录
+DEPLOY_DIR="$SCRIPT_DIR"                                   #不想改太多东西
+TMUX_SESSION_ASTRBOT="Astrbot"                             #tmux 会话名称
+CURRENT_USER=$(whoami)                                     #当前用户
 
 # =============================================================================
 # 日志函数
 # =============================================================================
 
 # 定义颜色
-RESET='\033[0m'     # 重置颜色
-BOLD='\033[1m'      # 加粗
-RED='\033[31m'      # 红色
-GREEN='\033[32m'    # 绿色
-YELLOW='\033[33m'   # 黄色
-BLUE='\033[34m'     # 蓝色
-CYAN='\033[36m'     # 青色
-MAGENTA='\033[35m'  # 紫色
+RESET='\033[0m'    # 重置颜色
+BOLD='\033[1m'     # 加粗
+RED='\033[31m'     # 红色
+GREEN='\033[32m'   # 绿色
+YELLOW='\033[33m'  # 黄色
+BLUE='\033[34m'    # 蓝色
+CYAN='\033[36m'    # 青色
+MAGENTA='\033[35m' # 紫色
 
 # 信息日志
 info() { echo -e "${BLUE}[INFO]${RESET} $1"; }
@@ -64,17 +62,17 @@ print_warning() { echo -e "${MAGENTA}[WARNING]${RESET} $1"; }
 # 分割线
 hr() { echo -e "${CYAN}================================================${RESET}"; }
 
-# 使用自定义的蓝色艺术字
 astrbot_art() {
     echo -e "${CYAN}"
-    echo "     _        _        ____        _   "
-    echo "    / \   ___| |_ _ __| __ )  ___ | |_ "
-    echo "   / _ \ / __| __| '__|  _ \ / _ \| __|"
-    echo "  / ___ \\__ \ |_| |  | |_) | (_) | |_ "
-    echo " /_/   \_\___/\__|_|  |____/ \___/ \__|"
+    cat <<'EOF'
+   _        _        ____        _   
+  / \   ___| |_ _ __| __ )  ___ | |_ 
+ / _ \ / __| __| '__|  _ \ / _ \| __|
+/ ___ \\__ \ |_| |  | |_) | (_) | |_ 
+/_/   \_\___/\__|_|  |____/ \___/ \__|
+EOF
     echo -e "${RESET}"
 }
-
 
 #------------------------------------------------------------------------------
 
@@ -89,44 +87,43 @@ tmux_session_exists() {
 
 #用于检查关键命令是否存在
 check_command() {
-    for cmd in "$@"; do                            #遍历所有传入的命令    
-        if ! command -v "$cmd" &>/dev/null; then   #如果命令不存在
-            err "关键命令 '$cmd' 未找到"             #打印错误信息
-            return 1                               #返回错误状态
-        fi                                         #结束条件判断
-    done                                           #结束循环
-}                                                  #结束函数定义
-
+    for cmd in "$@"; do                          #遍历所有传入的命令
+        if ! command -v "$cmd" &>/dev/null; then #如果命令不存在
+            err "关键命令 '$cmd' 未找到"                #打印错误信息
+            return 1                             #返回错误状态
+        fi                                       #结束条件判断
+    done                                         #结束循环
+}                                                #结束函数定义
 
 # =============================================================================
 # 停止AstrBot
 # =============================================================================
-stop_service() {                                                     #定义函数
-    info "正在停止 '$TMUX_SESSION_ASTRBOT' 相关进程和会话..."            #打印信息日志
-    tmux kill-session -t "$TMUX_SESSION_ASTRBOT" 2>/dev/null         #杀掉 tmux 会话
-    ok "'$TMUX_SESSION_ASTRBOT' 清理完成"                             #打印成功日志
-}                                                                    #结束函数定义
+stop_service() {                                             #定义函数
+    info "正在停止 '$TMUX_SESSION_ASTRBOT' 相关进程和会话..."           #打印信息日志
+    tmux kill-session -t "$TMUX_SESSION_ASTRBOT" 2>/dev/null #杀掉 tmux 会话
+    ok "'$TMUX_SESSION_ASTRBOT' 清理完成"                        #打印成功日志
+}                                                            #结束函数定义
 
 #------------------------------------------------------------------------------
 
 # =============================================================================
 # 后台启动AstrBot
 # =============================================================================
-start_service_background() {       #定义函数
+start_service_background() { #定义函数
     tmux new-session -d -s "$TMUX_SESSION_ASTRBOT" \
-            "cd '$DEPLOY_DIR/AstrBot' && uv run python main.py"
-    sleep 1                               #等待 1 秒确保服务启动
-    ok "AstrBot 已在后台启动"              #打印成功日志 (修复变量名)
+        "cd '$DEPLOY_DIR/AstrBot' && uv run python main.py"
+    sleep 1             #等待 1 秒确保服务启动
+    ok "AstrBot 已在后台启动" #打印成功日志 (修复变量名)
 }
 #------------------------------------------------------------------------------
 
 # =============================================================================
 # 前台启动AstrBot
 # =============================================================================
-start_astrbot_interactive() {             #定义函数
-    cd "$DEPLOY_DIR/AstrBot"              #进入 AstrBot 目录
-    uv run python "$DEPLOY_DIR/AstrBot/main.py"  #使用 uv 运行 AstrBot 主程序
-}                                         #结束函数定义
+start_astrbot_interactive() {                   #定义函数
+    cd "$DEPLOY_DIR/AstrBot" || exit            #进入 AstrBot 目录
+    uv run python "$DEPLOY_DIR/AstrBot/main.py" #使用 uv 运行 AstrBot 主程序
+}                                               #结束函数定义
 #------------------------------------------------------------------------------
 
 # =============================================================================
@@ -147,48 +144,48 @@ main_menu() {
         echo -e "  ${RED}4.${RESET} 停止所有服务"
         hr
         echo -e "  ${MAGENTA}q.${RESET} 退出脚本"
-        
+
         read -rp "请输入您的选择: " choice
 
         case $choice in
-            1) 
-                if tmux_session_exists "$TMUX_SESSION_ASTRBOT"; then
-                    stop_service
-                fi
-                start_service_background
-                echo -e "${GREEN}AstrBot 已启动 ${RESET}"
-                read -rp "按 Enter 键返回..."
-                ;;
-            2) 
-                clear
-                if tmux_session_exists "$TMUX_SESSION_ASTRBOT"; then
-                    stop_service
-                fi
-                start_astrbot_interactive
-                echo -e "${GREEN}AstrBot 已停止 ${RESET}"
-                read -rp "按 Enter 键返回..."
-                ;;
-            3) 
-                if tmux_session_exists "$TMUX_SESSION_ASTRBOT"; then
-                    tmux attach -t "$TMUX_SESSION_ASTRBOT"
-                else
-                    print_warning "AstrBot 会话不存在，无法附加"
-                fi
-                read -rp "按 Enter 键返回..."
-                ;;
-            4) 
+        1)
+            if tmux_session_exists "$TMUX_SESSION_ASTRBOT"; then
                 stop_service
-                echo -e "${RED}所有服务已停止${RESET}"
-                read -rp "按 Enter 键返回..."
-                ;;
-            q|0) 
-                echo -e "${CYAN}退出脚本...${RESET}"
-                exit 0
-                ;;
-            *) 
-                warn "无效输入，请重试"
-                sleep 1
-                ;;
+            fi
+            start_service_background
+            echo -e "${GREEN}AstrBot 已启动 ${RESET}"
+            read -rp "按 Enter 键返回..."
+            ;;
+        2)
+            clear
+            if tmux_session_exists "$TMUX_SESSION_ASTRBOT"; then
+                stop_service
+            fi
+            start_astrbot_interactive
+            echo -e "${GREEN}AstrBot 已停止 ${RESET}"
+            read -rp "按 Enter 键返回..."
+            ;;
+        3)
+            if tmux_session_exists "$TMUX_SESSION_ASTRBOT"; then
+                tmux attach -t "$TMUX_SESSION_ASTRBOT"
+            else
+                print_warning "AstrBot 会话不存在，无法附加"
+            fi
+            read -rp "按 Enter 键返回..."
+            ;;
+        4)
+            stop_service
+            echo -e "${RED}所有服务已停止${RESET}"
+            read -rp "按 Enter 键返回..."
+            ;;
+        q | 0)
+            echo -e "${CYAN}退出脚本...${RESET}"
+            exit 0
+            ;;
+        *)
+            warn "无效输入，请重试"
+            sleep 1
+            ;;
         esac
     done
 }
@@ -204,7 +201,7 @@ main() {
     if ! check_command tmux; then
         exit 1
     fi
-    
+
     # 启动主菜单
     main_menu
 }
